@@ -1,0 +1,27 @@
+{
+  "description": "Contrat de liaison temporaire entre deux utilisateurs",
+  "rules": {
+    "pairing": {
+      "initiatorId": {
+        "type": "objectId",
+        "description": "ID de l'utilisateur qui a lancé l'invitation (User A)",
+        "required": true
+      },
+      "targetId": {
+        "type": "objectId",
+        "description": "ID de l'utilisateur rejoint (User B)",
+        "required": true
+      },
+      "status": {
+        "pattern": "^(pending|active|expired)$",
+        "description": "État de la liaison",
+        "error": "Le statut doit être pending, active ou expired"
+      },
+      "expiresAt": {
+        "type": "ISO-8601",
+        "description": "Fin de validité du partage (RGPD : pas de stockage infini)",
+        "required": true
+      }
+    }
+  }
+}
