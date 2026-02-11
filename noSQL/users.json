@@ -1,0 +1,47 @@
+{
+  "collectionName": "users",
+  "description": "Contrat de données de la collection users",
+  "schema": {
+    "bsonType": "object",
+    "required": [
+      "_id",
+      "username",
+      "email",
+      "password",
+      "isOnline",
+      "isVisible"
+    ],
+    "properties": {
+      "_id": {
+        "bsonType": "objectId",
+        "description": "Identifiant unique généré par MongoDB"
+      },
+      "username": {
+        "bsonType": "string",
+        "description": "Nom d'affichage pour la recherche. Doit être unique."
+      },
+      "email": {
+        "bsonType": "string",
+        "description": "Adresse mail unique pour connexion et invitations."
+      },
+      "password": {
+        "bsonType": "string",
+        "description": "Hash du mot de passe (1maj, 1min, 1spé, 1num minimum)"
+      },
+      "isOnline": {
+        "bsonType": "boolean",
+        "description": "Statut de connexion websocket"
+      },
+      "isVisible": {
+        "bsonType": "boolean",
+        "description": "Droit de visualisation par des tiers"
+      },
+      "createdAt": {
+        "bsonType": "date"
+      },
+      "updatedAt": {
+        "bsonType": "date"
+      }
+    }
+  }
+}
