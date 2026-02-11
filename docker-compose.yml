@@ -1,0 +1,61 @@
+services:
+  database:
+    image: mongo:latest
+    container_name: mongo
+    environment:
+      # Ces variables servent uniquement à CRÉER la base au premier lancement
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+    ports:
+      - "27017:27017"
+    volumes:
+      - meet-me_data:/data/db
+    restart: always
+
+  app:
+    container_name: front
+    build:
+      context: . # IMPORTANT : On regarde tout le projet pour voir package.json
+      dockerfile: ./docker/Node.Dockerfile
+    restart: always
+    working_dir: /app
+    environment:
+      # On passe ici toutes les variables dont Next.js a besoin
+      APP_ENV: ${APP_ENV}
+      APP_URL: ${APP_URL}
+      MONGODB_URI: ${MONGODB_URI}
+      JWT_SECRET: ${JWT_SECRET}
+    volumes:
+      - .:/app
+      - /app/node_modules # Protège les modules node du conteneur
+    depends_on:
+      - database
+
+  server:
+    image: caddy:latest
+    container_name: caddy
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./docker/Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - app
+
+  mailer:
+    container_name: mailing
+    image: axllent/mailpit
+    command: ["--smtp-auth-allow-insecure"]
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    environment:
+      MP_SMTP_AUTH_ACCEPT_ANY: 1
+
+volumes:
+  meet-me_data:
+  caddy_data:
+  caddy_config:
