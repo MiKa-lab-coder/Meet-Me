@@ -22,6 +22,10 @@
         "pattern": "^(?=.*[A-Z])(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]).+$",
         "description": "Force: 1 maj, 1 spécial. Longueur gérée par min/max.",
         "error": "Le mot de passe nécessite 6-12 caractères avec 1 majuscule et 1 caractère spécial"
+      },
+      "confirmPassword": {
+        "required": true,
+        "error": "La confirmation du mot de passe doit correspondre au mot de passe"
       }
     },
     "tracking": {
