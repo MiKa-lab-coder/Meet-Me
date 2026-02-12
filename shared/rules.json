@@ -12,6 +12,7 @@
       },
       "email": {
         "required": true,
+        "unique": true,
         "pattern": "^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$",
         "error": "Format d'email invalide (ex: exemple@domaine.com)"
       },
