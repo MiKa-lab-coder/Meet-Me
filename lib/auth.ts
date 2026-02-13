@@ -19,7 +19,7 @@ const secret = new TextEncoder().encode(secretKey);
 const tokenExpiration = '1h';
 
 // Interface pour les données utilisateur à inclure dans le token
-interface ITokenPayload {
+export interface ITokenPayload {
     username: string;
     email: string;
     userId?: string;
