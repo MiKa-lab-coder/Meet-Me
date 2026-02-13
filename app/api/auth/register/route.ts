@@ -10,6 +10,8 @@ import {IRegistrationData, Iuser} from '@/shared/interfaces';
 import {NextResponse} from "next/server";
 import bcrypt from 'bcryptjs';
 import clientPromise from "@/lib/mongodb";
+import {createToken} from "@/lib/auth";
+import {setAuthCookie} from "@/lib/httpOnly";
 
 export async function POST(request: Request) {
     try {
@@ -83,17 +85,29 @@ export async function POST(request: Request) {
          * npm install bcryptjs
          * npm install --save-dev @types/bcryptjs car ici on utilise TypeScript
          */
+        // Le mot de passe est hashé avec un coût de 10 (le nombre de rounds de salage)
         finalData.password = await bcrypt.hash(data.password, 10);
 
-
         // Si toutes les validations passent, on peut procéder à l'inscription de l'utilisateur
-        //
-        const saveUser = await db.collection('users').insertOne(finalData as Omit<IRegistrationData, '_id'>);
+        const saveUser = await db.collection('users').insertOne
+            // Omet le champ _id qui est automatiquement généré par MongoDB lors de l'insertion
+        (finalData as Omit<IRegistrationData, '_id'>);
 
-        // Si l'inscription est réussie, on retourne une réponse JSON avec un message de succès et un statut 201 (Created)
-        if (saveUser.insertedId) {
-            return NextResponse.json({message: "Inscription réussie", userId: saveUser.insertedId}, {status: 201});
+        // Si l'insertion de l'utilisateur dans la base de données échoue (pas d'ID inséré), on retourne une erreur
+        if (!saveUser.insertedId) {
+            throw new Error("l'inscription a échoué");
         }
+        // Création d'un token d'authentification pour connecter l'utilisateur immédiatement après l'inscription
+        const token = await createToken(
+            {
+                username: finalData.username,
+                email: finalData.email,
+                userId: saveUser.insertedId.toString()
+            });
+        // Stockage du token d'authentification dans un cookie HTTP Only pour sécuriser la session de l'utilisateur
+        await setAuthCookie(token);
+
+        return NextResponse.json({message: "Inscription réussie",userId :saveUser.insertedId}, {status: 201});
 
     } catch (error) {
         // En cas d'erreur, on retourne une réponse JSON avec un statut 500 (Internal Server Error)
