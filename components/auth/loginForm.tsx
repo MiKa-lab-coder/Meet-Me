@@ -4,15 +4,14 @@
  * le composant est aveugle, il met en place la structure du formulaire et les styles
  * meme le msg d'erreur, est à la charge du parent qui utilise ce composant
  */
-
-import { ValidateButton } from "@/components/ui/button"; // Import du bouton de validation réutilisable
+import {ValidateButton} from "@/components/ui/button"; // Import du bouton de validation réutilisable
 
 interface LoginFormProps {
     onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
     error?: string; // Message d'erreur unique venant du SSoT (rules.json via le parent)
 }
 
-export function LoginForm({ onSubmit, error }: LoginFormProps) {
+export function LoginForm({onSubmit, error}: LoginFormProps) {
     return (
         <form onSubmit={onSubmit} className="flex flex-col gap-4 w-full max-w-sm">
             {/* Message d'erreur affiché uniquement si le parent en envoie un */}
@@ -42,7 +41,8 @@ export function LoginForm({ onSubmit, error }: LoginFormProps) {
 
             {/* Utilisation de ton bouton de validation */}
             <div className="mt-2">
-                <ValidateButton onClick={() => {}} children="Se connecter" />
+                <ValidateButton onClick={() => {
+                }} children="Se connecter"/>
             </div>
         </form>
     );
