@@ -4,7 +4,9 @@
  * le composant est aveugle, il met en place la structure du formulaire et les styles
  * meme le msg d'erreur, est à la charge du parent qui utilise ce composant
  */
-import {ValidateButton} from "@/components/ui/button"; // Import du bouton de validation réutilisable
+
+import {ValidateButton} from "@/components/ui/button";
+import React from "react"; // Import du bouton de validation réutilisable
 
 interface LoginFormProps {
     onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
