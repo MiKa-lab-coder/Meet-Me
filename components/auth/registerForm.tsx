@@ -10,11 +10,12 @@ import React from "react";
 
 interface RegisterFormProps {
     onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
-    onCancel: () => void;
+    onCancel: () => void; //
     error?: string; // Message d'erreur unique venant du SSoT (rules.json via le parent)
+    isLoading?: boolean; // Indique si le formulaire est en cours de soumission, pour désactiver les boutons
 }
 
-export function RegisterForm({onSubmit, onCancel, error}: RegisterFormProps) {
+export function RegisterForm({onSubmit, onCancel, error, isLoading}: RegisterFormProps) {
     return (
         <form onSubmit={onSubmit} className="flex flex-col gap-4 w-full max-w-sm">
             {/* Message d'erreur affiché uniquement si le parent en envoie un */}
@@ -57,10 +58,13 @@ export function RegisterForm({onSubmit, onCancel, error}: RegisterFormProps) {
             />
             {/* Utilisation des boutons de validation et d'annulation */}
             <div className="flex gap-2 mt-2">
-                <ValidateButton onClick={() => {
-                }} children="S'enregistrer"/>
-                <CancelButton onClick={() => {
-                }} children="Annuler"/>
+                <ValidateButton disabled={isLoading}>
+                    {isLoading ? "S'enregistrer..." : "S'enregistrer"}
+                </ValidateButton>
+
+                <CancelButton onClick={onCancel} type="button" disabled={isLoading}>
+                    Annuler
+                </CancelButton>
             </div>
         </form>
     );
