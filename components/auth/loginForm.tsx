@@ -11,9 +11,10 @@ import React from "react"; // Import du bouton de validation réutilisable
 interface LoginFormProps {
     onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
     error?: string; // Message d'erreur unique venant du SSoT (rules.json via le parent)
+        isLoading?: boolean; // Indique si le formulaire est en cours de soumission, pour désactiver les boutons
 }
 
-export function LoginForm({onSubmit, error}: LoginFormProps) {
+export function LoginForm({onSubmit, error,isLoading}: LoginFormProps) {
     return (
         <form onSubmit={onSubmit} className="flex flex-col gap-4 w-full max-w-sm">
             {/* Message d'erreur affiché uniquement si le parent en envoie un */}
@@ -41,10 +42,11 @@ export function LoginForm({onSubmit, error}: LoginFormProps) {
                 required
             />
 
-            {/* Utilisation de ton bouton de validation */}
+            {/* Appelle du bouton */}
             <div className="mt-2">
-                <ValidateButton onClick={() => {
-                }} children="Se connecter"/>
+                <ValidateButton disabled={isLoading}>
+                    {isLoading ? "Connexion..." : "Se connecter"}
+                </ValidateButton>
             </div>
         </form>
     );
