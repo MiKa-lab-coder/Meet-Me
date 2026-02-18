@@ -12,6 +12,7 @@ import {IAuthData} from '@/shared/interfaces';
 import {useState} from 'react';
 import {useRouter} from 'next/navigation';
 import {LoginForm} from '@/components/auth/loginForm';
+import {Loader} from 'lucide-react';
 
 export default function LoginPage() {
     const [error, setError] = useState<string | null>(null);
@@ -67,9 +68,19 @@ export default function LoginPage() {
 
         return (
             <div className="min-h-screen flex items-center justify-center bg-gray-100">
-                <div className="bg-white p-8 rounded shadow-md w-full max-w-md">
+                {/* Relative pour l'overlay */}
+                <div className="relative bg-white p-8 rounded shadow-md w-full max-w-md overflow-hidden">
+
+                    {/* Overlay de chargement */}
+                    {isLoading && (
+                        <div
+                            className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-white/60 backdrop-blur-sm">
+                            <Loader className="w-10 h-10 text-meetme-blue animate-spin"/>
+                        </div>
+                    )}
+
                     <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">Se connecter</h2>
-                    {/* On laisse le LoginForm gérer l'affichage de l'erreur via sa prop */}
+
                     <LoginForm
                         onSubmit={handleSubmit}
                         error={error || undefined}
