@@ -56,10 +56,15 @@ export default function LoginPage() {
             });
 
             if (response.ok) {
-                router.push('/share-location'); // Redirige vers la page de partage de position
+                router.push('/share-location');// Redirection vers la page de partage de position en cas de succès
+            } else {
+                // Récupération du message d'erreur depuis la réponse de l'API
+                const result = await response.json();
+                setError(result.error || "Identifiants incorrects");
             }
+            // Désactive le chargement après la réponse de l'API, pour éviter de laisser le spinner tourner indéfiniment
+            setIsLoading(false);
 
-            setIsLoading(false); // Désactive le chargement à la fin
         } catch (err) {
             setError('Une erreur est survenue. Veuillez réessayer.');
             setIsLoading(false); // Désactive le chargement en cas d'erreur
