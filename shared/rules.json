@@ -48,7 +48,7 @@
         "min": 0,
         "max": 15,
         "required": true,
-        "error": "Précision GPS insuffisante ou invalide (0-5m attendus)"
+        "error": "Précision GPS insuffisante ou invalide (0-15m attendus)"
       },
       "timestamp": {
         "required": true,
