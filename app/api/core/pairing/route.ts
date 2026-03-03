@@ -10,6 +10,7 @@ import clientPromise from '@/lib/mongodb';
 import { ObjectId } from 'mongodb';
 import { getAuthToken } from "@/lib/httpOnly";
 import { verifyToken } from "@/lib/auth";
+import {error} from "next/dist/build/output/log";
 
 // utilisateur A : initiateur du pairing
 export async function POST(request: Request) {
@@ -116,4 +117,49 @@ export async function PATCH(request: Request) {
     } catch (error) {
         return NextResponse.json({ error: 'Erreur technique lors de la validation' }, { status: 500 });
     }
+}
+
+// Endpoint pour récupérer les détails d'un pairing via le code et le token,
+// utilisé pour la redirection vers la page de partage de localisation depuis le lien de l'invitation.
+export async function GET(request: Request) {
+    const url = new URL(request.url);
+    const pairingCode = url.searchParams.get('pairingCode');
+    const magicToken = url.searchParams.get('magicToken');
+
+    // Validation de présence
+    if (!pairingCode || !magicToken) {
+        return NextResponse.json({ error: 'Lien invalide ou incomplet' }, { status: 400 });
+    }
+
+    // Validation format via rules.json
+    if (!new RegExp(rules.rules.pairing.pairingCode.pattern).test(pairingCode)) {
+        return NextResponse.json({ error: rules.rules.pairing.pairingCode.error }, { status: 400 });
+    }
+
+    const client = await clientPromise;
+    const db = client.db();
+
+    // Recherche en base strict : code + token + statut pending
+    const pairing = await db.collection('pairings').findOne({
+        pairingCode,
+        magicToken,
+        status: 'pending'
+    });
+
+    if (!pairing) {
+        return NextResponse.json({ error: 'Invitation expirée ou déjà utilisée' }, { status: 404 });
+    }
+
+    // Vérification de l'expiration
+    if (new Date() > pairing.expiresAt) {
+        return NextResponse.json({ error: 'Ce lien a expiré' }, { status: 400 });
+    }
+
+    // Redirection vers la page de partage de localisation avec les paramètres nécessaires pour la validation du pairing
+    // On passe le code et le token dans l'URL pour que la page puisse appeler le PATCH
+    const redirectUrl = new URL('/share-location', request.url);
+    redirectUrl.searchParams.set('pairingCode', pairingCode);
+    redirectUrl.searchParams.set('magicToken', magicToken);
+
+    return NextResponse.redirect(redirectUrl);
 }
