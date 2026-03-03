@@ -4,27 +4,34 @@
  */
 
 import {NextResponse} from "next/server";
+import type { NextRequest } from 'next/server';
 import {getAuthToken} from "@/lib/httpOnly";
 import {verifyToken} from "@/lib/auth";
 
-export async function middleware(request: Request) {
-    // Vérification de l'existence d'un token d'authentification dans les cookies HTTP Only
+export async function middleware(request: NextRequest) {
+    // Utilisation de request.nextUrl
+    const magicToken = request.nextUrl.searchParams.get('magicToken');
+
+    // Si un magicToken est présent, on laisse passer l'utilisateur.
+    if (magicToken) {
+        return NextResponse.next();
+    }
+
+    // Vérification du cookie de session
     const token = await getAuthToken();
-    // Si aucun token n'est trouvé, rediriger l'utilisateur vers la page de connexion
+
     if (!token) {
         return NextResponse.redirect(new URL('/auth/login', request.url));
     }
-    // Si un token est trouvé, permettre l'accès à la page demandée
+
     try {
-        await verifyToken(token); // Vérification de la validité du token
-        return NextResponse.next(); // Permettre l'accès à la page demandée
+        await verifyToken(token);
+        return NextResponse.next();
     } catch (error) {
-        // Si le token est invalide, rediriger l'utilisateur vers la page de connexion
         return NextResponse.redirect(new URL('/auth/login', request.url));
     }
 }
 
-// Spécification des routes pour lesquelles ce middleware doit être appliqué
 export const config = {
-    matcher: '/share-location:path' // Appliquer le middleware uniquement pour les routes commençant par /share-location
+    matcher: '/share-location/:path*'
 };
