@@ -1,5 +1,5 @@
 /**
- * Composant modale (ifConfirm) pour entrer le PIN de jumelage entre deux utilisateurs.
+ * Composant modale pour entrer le PIN de jumelage entre deux utilisateurs.
  * Le PIN est un code alphanumerique de 6 caractères et envoyer par email à l'utilisateur à jumeler.
  * L'utilisateur doit entrer le PIN pour valider le jumelage et commencer à partager sa position en temps réel.
  * Le PIN est valide pendant une durée limitée (ex: 10 minutes) pour garantir la sécurité du jumelage.
@@ -7,53 +7,104 @@
  * Une fois le jumelage validé, le PIN n'est plus nécessaire et les utilisateurs peuvent voir leur position respective sur la carte.
  */
 
-import React, {useState} from "react";
+import React, {useState, useEffect} from "react";
+import rules from "@/shared/rules.json";
+import {ValidateButton} from "@/components/ui/button";
 
-interface PinPairingProps {
-    onSubmit: (pin: string) => void; // Fonction pour valider le PIN de jumelage
-    error?: string; // Message d'erreur à afficher si le PIN est incorrect ou expiré
-    isLoading: boolean; // Indique si la validation du PIN est en cours
-}
+export function PinPairing() {
+    const [pairingCode, setPairingCode] = useState("");
+    const [magicToken, setMagicToken] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
+    const [isPaired, setIsPaired] = useState(false);
+    const [error, setError] = useState("");
 
-export function PinPairing({onSubmit, error, isLoading}: PinPairingProps) {
-    const [pin, setPin] = useState("");
+    // Extrait pairingCode et magicToken depuis les paramètres d'URL
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const code = params.get('pairingCode');
+        const token = params.get('magicToken');
+
+        if (code && token) {
+            setPairingCode(code);
+            setMagicToken(token);
+        }
+    }, []);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        // Convertit le PIN en majuscules pour éviter les erreurs de saisie (ex: "abc123" devient "ABC123")
-        const value = e.target.value.toUpperCase();
-        setPin(value);
+        // Convertit le code saisi en majuscules (format attendu: "ABC123")
+        setPairingCode(e.target.value.toUpperCase());
     }
-    // Gère la soumission du formulaire pour valider le PIN de jumelage
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+
+    // Valide le jumelage en envoyant le code et le token au serveur
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        onSubmit(pin);
+        setIsLoading(true);
+        setError("");
+
+        try {
+            // Validation du format du code avant envoi (6 caractères alphanumériques)
+            const codePattern = new RegExp(rules.rules.pairing.pairingCode.pattern);
+            const codeError = rules.rules.pairing.pairingCode.error;
+            if (!codePattern.test(pairingCode)) {
+                throw new Error(codeError);
+            }
+
+            // Appel API PATCH pour valider le jumelage
+            // Envoie: code + token + authentification utilisateur
+            const response = await fetch('/api/core/pairing', {
+                method: 'PATCH',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    pairingCode,
+                    magicToken
+                }),
+                credentials: 'include' // Important: envoie les cookies d'authentification
+            });
+
+            if (!response.ok) {
+                const data = await response.json();
+                throw new Error(data.error || 'Erreur lors de la validation du jumelage');
+            }
+
+            // Jumelage validé avec succès
+            setIsPaired(true);
+            // Redirection optionnelle vers /share-location après succès
+            setTimeout(() => {
+                window.location.href = '/share-location';
+            }, 1000);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : "Erreur lors de la validation du jumelage");
+        } finally {
+            setIsLoading(false);
+        }
     };
 
+    // Affichage du formulaire
     return (
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4 w-full max-w-sm">
-            {error && (
-                <div className="text-meetme-red text-sm bg-red-50 p-2 rounded border border-red-200">
-                    {error}
-                </div>
+        <div className="pairing-modal">
+            <h2>Valider le jumelage</h2>
+            {isPaired ? (
+                <p style={{color: 'green'}}>Jumelage validé avec succès! ✓</p>
+            ) : (
+                <form onSubmit={handleSubmit}>
+                    <input
+                        type="text"
+                        placeholder="Code de 6 caractères (ex: ABC123)"
+                        value={pairingCode}
+                        onChange={handleChange}
+                        maxLength={6}
+                        disabled={isLoading}
+                        required
+                    />
+                    <ValidateButton
+                        type="submit"
+                        disabled={isLoading || pairingCode.length !== 6}
+                    >
+                        {isLoading ? 'Validation...' : 'Valider le jumelage'}
+                    </ValidateButton>
+                    {error && <p style={{color: 'meetme-red'}}>{error}</p>}
+                </form>
             )}
-            <input
-                name="pin"
-                type="text"
-                placeholder="Entrez le PIN de jumelage"
-                autoFocus={true}
-                className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-meetme-blue uppercase"
-                value={pin}
-                onChange={handleChange}
-                disabled={isLoading} // Désactive l'input pendant la validation du PIN
-                required
-            />
-            <button
-                type="submit"
-                className="bg-meetme-blue text-white px-4 py-2 rounded-md hover:bg-meetme-blue-dark disabled:bg-gray-400"
-                disabled={isLoading} // Désactive le bouton pendant la validation du PIN
-            >
-                {isLoading ? "Validation en cours..." : "Valider le PIN"}
-            </button>
-        </form>
+        </div>
     );
 }
