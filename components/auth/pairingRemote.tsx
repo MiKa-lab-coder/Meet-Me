@@ -7,10 +7,11 @@
  * et de réagir en conséquence (ex: afficher la position de l'autre utilisateur sur la carte)
  */
 
+"use client";
 import React, {useState} from "react";
 import {ValidateButton, DeleteButton} from "@/components/ui/button";
 
-export function PairingRemote() {
+export default function PairingRemote() {
     const [username, setUsername] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [isPaired, setIsPaired] = useState(false);

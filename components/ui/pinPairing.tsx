@@ -11,7 +11,7 @@ import React, {useState, useEffect} from "react";
 import rules from "@/shared/rules.json";
 import {ValidateButton} from "@/components/ui/button";
 
-export function PinPairing() {
+export default function PinPairing() {
     const [pairingCode, setPairingCode] = useState("");
     const [magicToken, setMagicToken] = useState("");
     const [isLoading, setIsLoading] = useState(false);
