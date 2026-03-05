@@ -1,0 +1,90 @@
+/**
+ * Page contenant la carte et les fonctionnalités de partage de position en temps réel.
+ * Cette page n'est accessible qu'aux utilisateurs connectés.
+ * Les utilisateurs peuvent voir leur position actuelle ET celle de la personne avec qui ils partagent leur position.
+ * Un seul partage de position est autorisé à la fois pour garantir la confidentialité et la sécurité des données de localisation.
+ * Les utilisateurs peuvent également arrêter le partage de position à tout moment.
+ */
+
+"use client";
+
+import { useEffect, useState } from 'react';
+import Maps from '@/components/layout/map';
+import PairingRemote from '@/components/auth/pairingRemote';
+import PinPairing from '@/components/ui/pinPairing';
+import { io, Socket } from "socket.io-client";
+import { startSharingLocation, stopSharingLocation } from "@/tools/useTracking";
+
+export default function SharingLocationPage() {
+    const [userPos, setUserPos] = useState<[number, number] | null>(null);
+    const [peerPos, setPeerPos] = useState<[number, number] | null>(null);
+    const [isPaired, setIsPaired] = useState(false);
+    const [pairingCode, setPairingCode] = useState<string | null>(null);
+    const [pairingId, setPairingId] = useState<string | null>(null); // Pour le DELETE
+    const [userId, setUserId] = useState<string | null>(null);
+    const [socket, setSocket] = useState<Socket | null>(null);
+
+    // Récupérer l'identité de l'utilisateur au démarrage
+    useEffect(() => {
+        fetch('/api/auth/me').then(res => res.json()).then(data => setUserId(data.userId));
+        const newSocket = io(process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3000');
+        setSocket(newSocket);
+        return () => { newSocket.disconnect(); };
+    }, []);
+
+    // Fonctions de rappels pour les composants enfants
+    const handlePairingSuccess = (id: string, code: string) => {
+        setPairingId(id);
+        setPairingCode(code);
+        setIsPaired(true); // Active le tracking et la carte
+    };
+
+    // Fonction pour arrêter le partage de position et nettoyer les états
+    const handleUnpair = () => {
+        if (socket && pairingCode && userId) {
+            stopSharingLocation(socket, pairingCode, userId); // Coupe le GPS/Socket
+        }
+        setIsPaired(false);
+        setPairingCode(null);
+        setPairingId(null);
+        setPeerPos(null);
+    };
+
+    // Lancer le tracker GPS/Socket quand isPaired devient vrai
+    useEffect(() => {
+        if (isPaired && pairingCode && socket && userId) {
+            startSharingLocation(
+                pairingCode,
+                userId,
+                socket,
+                (partnerData) => setPeerPos([partnerData.location.lat, partnerData.location.lng]),
+                () => alert("Arrivés !"),
+                (err) => console.error(err)
+            );
+        }
+    }, [isPaired, pairingCode, socket, userId]);
+
+    return (
+        <div className="flex flex-col gap-6 p-4">
+            <h1 className="text-2xl font-bold">MeetMe - Tracking Live</h1>
+
+            <Maps userPos={userPos} peerPos={peerPos} isPaired={isPaired} />
+
+            <div className="flex flex-col gap-4">
+                <PairingRemote
+                    isPaired={isPaired}
+                    pairingId={pairingId}
+                    onPairingSuccess={handlePairingSuccess}
+                    onUnpair={handleUnpair}
+                />
+
+                {!isPaired && (
+                    <PinPairing onValidationSuccess={(code) => {
+                        setPairingCode(code);
+                        setIsPaired(true);
+                    }} />
+                )}
+            </div>
+        </div>
+    );
+}
