@@ -11,87 +11,94 @@
 import React, {useState} from "react";
 import {ValidateButton, DeleteButton} from "@/components/ui/button";
 
-export default function PairingRemote() {
+interface PairingRemoteProps {
+    isPaired: boolean;
+    pairingId: string | null;
+    onPairingSuccess: (id: string, code: string) => void;
+    onUnpair: () => void;
+}
+
+export default function PairingRemote({
+                                          isPaired,
+                                          pairingId,
+                                          onPairingSuccess,
+                                          onUnpair
+                                      }: PairingRemoteProps) {
     const [username, setUsername] = useState("");
     const [isLoading, setIsLoading] = useState(false);
-    const [isPaired, setIsPaired] = useState(false);
     const [error, setError] = useState("");
-    const [pairingId, setPairingId] = useState<string | null>(null);
 
     const handlePairing = async () => {
         setIsLoading(true);
         setError("");
-
         try {
-            // Appel à l'API pour initier le jumelage
             const response = await fetch('/api/core/pairing', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({targetUsername: username})
             });
 
-            if (!response.ok) {
-                const data = await response.json();
-                throw new Error(data.error || 'Erreur lors du jumelage');
-            }
-
-            // Récupère l'ID du pairing créé depuis la réponse
             const data = await response.json();
-            setPairingId(data.pairing.id);
-            setIsPaired(true);
-        } catch (err) {
-            setError(err instanceof Error ? err.message : "Erreur lors du jumelage");
+            if (!response.ok) throw new Error(data.error || 'Erreur lors du jumelage');
+
+            // On transmet les infos à la page parente
+            onPairingSuccess(data.pairing.id, data.pairing.pairingCode);
+        } catch (err: any) {
+            setError(err.message);
         } finally {
             setIsLoading(false);
         }
     };
 
     const handleUnpairing = async () => {
+        if (!pairingId) return;
         setIsLoading(true);
-        setError("");
-
         try {
-            // Appel à l'API pour terminer le jumelage avec l'ID réel
             const response = await fetch('/api/core/pairing', {
                 method: 'DELETE',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({pairingId: pairingId})
+                body: JSON.stringify({pairingId})
             });
 
-            if (!response.ok) {
-                const data = await response.json();
-                throw new Error(data.error || 'Erreur lors de la terminaison du jumelage');
-            }
+            if (!response.ok) throw new Error('Erreur lors de la déconnexion');
 
-            setIsPaired(false);
-            setPairingId(null);
-        } catch (error) {
-            setError(error instanceof Error ? error.message : 'Erreur lors de la terminaison du jumelage');
+            onUnpair(); // Notifie la page pour couper GPS/Socket
+            setUsername("");
+        } catch (err: any) {
+            setError(err.message);
         } finally {
             setIsLoading(false);
         }
     };
 
     return (
-        <div>
-            <input
-                type="text"
-                placeholder="Nom d'utilisateur à jumeler"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                disabled={isLoading || isPaired}
-            />
+        <div className="p-4 border rounded-lg bg-white shadow-sm flex flex-col gap-3">
+            <h3 className="font-bold text-gray-700">Gestion du partage</h3>
+
             {!isPaired ? (
-                <ValidateButton onClick={handlePairing} disabled={isLoading || !username}>
-                    Jumeler
-                </ValidateButton>
+                <>
+                    <input
+                        type="text"
+                        className="border p-2 rounded w-full outline-none focus:ring-2 focus:ring-blue-400 text-black"
+                        placeholder="Pseudo du destinataire..."
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                        disabled={isLoading}
+                    />
+                    <ValidateButton onClick={handlePairing} disabled={isLoading || !username}>
+                        {isLoading ? "Envoi..." : "Démarrer le partage"}
+                    </ValidateButton>
+                </>
             ) : (
-                <DeleteButton onClick={handleUnpairing} disabled={isLoading}>
-                    Terminer le jumelage
-                </DeleteButton>
+                <div className="flex flex-col gap-2">
+                    <p className="text-green-600 text-sm font-medium">✓ Partage en cours</p>
+                    <DeleteButton onClick={handleUnpairing} disabled={isLoading}>
+                        {isLoading ? "Déconnexion..." : "Arrêter le partage"}
+                    </DeleteButton>
+                </div>
             )}
-            {error && <p style={{color: 'red'}}>{error}</p>}
+
+            {error && <p className="text-red-500 text-xs font-semibold">{error}</p>}
         </div>
     );
 }
-
