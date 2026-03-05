@@ -7,104 +7,63 @@
  * Une fois le jumelage validé, le PIN n'est plus nécessaire et les utilisateurs peuvent voir leur position respective sur la carte.
  */
 
-import React, {useState, useEffect} from "react";
-import rules from "@/shared/rules.json";
-import {ValidateButton} from "@/components/ui/button";
+"use client";
+import React, { useState, useEffect } from "react";
+import { ValidateButton } from "@/components/ui/button";
 
-export default function PinPairing() {
+interface PinPairingProps {
+    onValidationSuccess: (code: string) => void;
+}
+
+export default function PinPairing({ onValidationSuccess }: PinPairingProps) {
     const [pairingCode, setPairingCode] = useState("");
     const [magicToken, setMagicToken] = useState("");
     const [isLoading, setIsLoading] = useState(false);
-    const [isPaired, setIsPaired] = useState(false);
     const [error, setError] = useState("");
 
-    // Extrait pairingCode et magicToken depuis les paramètres d'URL
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);
-        const code = params.get('pairingCode');
-        const token = params.get('magicToken');
-
-        if (code && token) {
-            setPairingCode(code);
-            setMagicToken(token);
-        }
+        setPairingCode(params.get('pairingCode') || "");
+        setMagicToken(params.get('magicToken') || "");
     }, []);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        // Convertit le code saisi en majuscules (format attendu: "ABC123")
-        setPairingCode(e.target.value.toUpperCase());
-    }
-
-    // Valide le jumelage en envoyant le code et le token au serveur
-    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
-        setError("");
-
         try {
-            // Validation du format du code avant envoi (6 caractères alphanumériques)
-            const codePattern = new RegExp(rules.rules.pairing.pairingCode.pattern);
-            const codeError = rules.rules.pairing.pairingCode.error;
-            if (!codePattern.test(pairingCode)) {
-                throw new Error(codeError);
-            }
-
-            // Appel API PATCH pour valider le jumelage
-            // Envoie: code + token + authentification utilisateur
             const response = await fetch('/api/core/pairing', {
                 method: 'PATCH',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({
-                    pairingCode,
-                    magicToken
-                }),
-                credentials: 'include' // Important: envoie les cookies d'authentification
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ pairingCode, magicToken }),
+                credentials: 'include'
             });
 
-            if (!response.ok) {
-                const data = await response.json();
-                throw new Error(data.error || 'Erreur lors de la validation du jumelage');
-            }
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.error || 'Code invalide');
 
-            // Jumelage validé avec succès
-            setIsPaired(true);
-            // Redirection optionnelle vers /share-location après succès
-            setTimeout(() => {
-                window.location.href = '/share-location';
-            }, 1000);
-        } catch (err) {
-            setError(err instanceof Error ? err.message : "Erreur lors de la validation du jumelage");
+            // Succès : on prévient la page avec le code validé
+            onValidationSuccess(pairingCode);
+        } catch (err: any) {
+            setError(err.message);
         } finally {
             setIsLoading(false);
         }
     };
 
-    // Affichage du formulaire
     return (
-        <div className="pairing-modal">
-            <h2>Valider le jumelage</h2>
-            {isPaired ? (
-                <p style={{color: 'green'}}>Jumelage validé avec succès! ✓</p>
-            ) : (
-                <form onSubmit={handleSubmit}>
-                    <input
-                        type="text"
-                        placeholder="Code de 6 caractères (ex: ABC123)"
-                        value={pairingCode}
-                        onChange={handleChange}
-                        maxLength={6}
-                        disabled={isLoading}
-                        required
-                    />
-                    <ValidateButton
-                        type="submit"
-                        disabled={isLoading || pairingCode.length !== 6}
-                    >
-                        {isLoading ? 'Validation...' : 'Valider le jumelage'}
-                    </ValidateButton>
-                    {error && <p style={{color: 'meetme-red'}}>{error}</p>}
-                </form>
-            )}
-        </div>
+        <form onSubmit={handleSubmit} className="p-4 border rounded-lg bg-blue-50">
+            <h3 className="font-bold mb-2">Entrez le code reçu par mail</h3>
+            <input
+                type="text"
+                className="border p-2 rounded w-full mb-2 text-center text-xl font-mono"
+                maxLength={6}
+                value={pairingCode}
+                onChange={(e) => setPairingCode(e.target.value.toUpperCase())}
+            />
+            <ValidateButton type="submit" disabled={isLoading || pairingCode.length !== 6}>
+                {isLoading ? "Vérification..." : "Valider le jumelage"}
+            </ValidateButton>
+            {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
+        </form>
     );
 }
