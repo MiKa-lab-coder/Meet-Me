@@ -2,7 +2,7 @@
  * Fichier permettant de gérer le contexte d'authentification dans l'ensemble de l'application.
  * Permet de verifier si l'utilisateur est connecté en utilisant le token d'authentification stocké dans les cookies HTTP Only.
  */
-
+"use client";
 import {createContext, useContext, useEffect, useState} from "react";
 
 
