@@ -37,9 +37,9 @@ export function Header() {
                           }`}>
                         Accueil
                     </Link>
-                    <Link href="/about"
+                    <Link href="/share-location"
                           className={`transition-colors hover:text-meetme-dark ${
-                              pathname === '/Meet' ? 'text-meetme-blue font-bold' : 'text-gray-600'
+                              pathname === '/share-location' ? 'text-meetme-blue font-bold' : 'text-gray-600'
                           }`}>
                         Meet
                     </Link>
