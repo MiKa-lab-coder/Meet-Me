@@ -10,7 +10,7 @@ const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"]
 export const metadata: Metadata = {
   title: "MeetMe - Tracker de Livraison",
   description: "Partagez votre position en temps réel avec vos proches via QR code.",
-  manifest: "/manifest.json", // Important pour ton déploiement PWA [cite: 2026-01-23]
+  manifest: "/manifest.json",
 };
 
 // Configuration pour l'affichage mobile PWA
