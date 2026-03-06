@@ -18,6 +18,13 @@ export function Header() {
     const pathname = usePathname();
     const logo = "/logo.png"; // Chemin vers le logo de l'application dans le dossier public
 
+    // Style commun pour les liens de navigation
+    const getLinkClasses = (isActive: boolean) => {
+        return `transition-colors hover:text-meetme-dark ${
+            isActive ? 'text-meetme-blue font-bold' : 'text-gray-600'
+        }`;
+    };
+
 
     return (
         /* Fond très léger pour faire ressortir le blanc du logo ou bordure colorée */
@@ -32,43 +39,34 @@ export function Header() {
 
                 {/* Navigation principale */}
                 <nav className="hidden md:flex space-x-6">
-                    <Link href="/"
-                          className={`transition-colors hover:text-meetme-dark ${
-                              pathname === '/' ? 'text-meetme-blue font-bold' : 'text-gray-600'
-                          }`}>
+                    {/* Lien Accueil */}
+                    <Link href="/" className={getLinkClasses(pathname === '/')}>
                         Accueil
                     </Link>
 
-                    {/* Affiche le lien "Meet" uniquement si l'utilisateur est authentifié */}
+                    {/* Lien Meet-Me: affiché uniquement si authentifié */}
                     {isAuthenticated && (
-                        <Link href="/share-location"
-                              className={`transition-colors hover:text-meetme-dark ${
-                                  pathname === '/share-location' ? 'text-meetme-blue font-bold' : 'text-gray-600'
-                              }`}>
+                        <Link href="/share-location" className={getLinkClasses(pathname === '/share-location')}>
                             Meet-Me
                         </Link>
                     )}
 
-                    <Link href="/login"
-                          className={`transition-colors hover:text-meetme-dark ${
-                              pathname === '/login' ? 'text-meetme-blue font-bold' : 'text-gray-600'
-                          }`}>
-                        Connexion
-                    </Link>
-
-                    {/* Affiche le lien "Inscription" si l'utilisateur n'est PAS authentifié */}
+                    {/* Lien Connexion: affiché si non authentifié */}
                     {!isAuthenticated && (
-                        <Link href="/register"
-                              className="text-meetme-blue font-semibold hover:text-meetme-dark transition-colors">
+                        <Link href="/login" className={getLinkClasses(pathname === '/login')}>
+                            Connexion
+                        </Link>
+                    )}
+
+                    {/* Lien Inscription: affiché si non authentifié */}
+                    {!isAuthenticated && (
+                        <Link href="/register" className={getLinkClasses(pathname === '/register')}>
                             Inscription
                         </Link>
                     )}
 
-                    {/* Affiche un bouton de déconnexion si l'utilisateur est authentifié */}
-                    {isAuthenticated && (
-                        <Logout/>
-                    )}
-
+                    {/* Bouton Déconnexion: affiché si authentifié */}
+                    {isAuthenticated && <Logout />}
                 </nav>
                 {/* Menu burger pour les écrans mobiles */}
                 <div
