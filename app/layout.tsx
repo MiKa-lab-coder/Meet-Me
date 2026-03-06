@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/components/auth/authContext";
 import { Header } from "@/components/layout/header";
+import {Footer} from "@/components/layout/footer";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
@@ -31,9 +32,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           <main className="flex-grow container mx-auto max-w-lg px-4 py-8">
             {children}
           </main>
-          <footer className="py-6 text-center text-xs text-zinc-400">
-            © 2026 MeetMe - Projet
-          </footer>
+          <Footer />
         </div>
       </AuthProvider>
       </body>
