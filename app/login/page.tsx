@@ -12,12 +12,14 @@ import {IAuthData} from '@/shared/interfaces';
 import {useState} from 'react';
 import {useRouter} from 'next/navigation';
 import {LoginForm} from '@/components/auth/loginForm';
+import {useAuth} from "@/components/auth/authContext";
 import {Loader} from 'lucide-react';
 
 export default function LoginPage() {
     const [error, setError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
+    const{ refreshAuth } = useAuth();
 
     // Fonction de gestion de la soumission du formulaire de connexion
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -56,6 +58,7 @@ export default function LoginPage() {
             });
 
             if (response.ok) {
+                await refreshAuth(); // Met à jour l'état d'authentification dans le contexte
                 router.push('/share-location');// Redirection vers la page de partage de position en cas de succès
             } else {
                 // Récupération du message d'erreur depuis la réponse de l'API

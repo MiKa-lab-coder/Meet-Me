@@ -9,12 +9,12 @@ import {useRouter} from 'next/navigation';
 import {usePathname} from "next/navigation";
 import {Burger} from "@/components/ui/burger";
 import {Logout} from "@/components/ui/logout";
-import {AuthContext} from "@/components/auth/authContext";
+import {useAuth} from "@/components/auth/authContext";
 
 export function Header() {
     const router = useRouter();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const {isAuthenticated} = useContext(AuthContext);
+    const {isAuthenticated} = useAuth();
     const pathname = usePathname();
     const logo = "/logo.png"; // Chemin vers le logo de l'application dans le dossier public
 

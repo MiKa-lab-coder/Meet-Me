@@ -12,12 +12,14 @@ import {IRegistrationData} from '@/shared/interfaces';
 import {useState} from 'react';
 import {useRouter} from 'next/navigation';
 import {RegisterForm} from '@/components/auth/registerForm';
+import {useAuth} from "@/components/auth/authContext";
 import {Loader} from 'lucide-react';
 
 export default function RegistrationPage() {
     const [error, setError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
+    const { refreshAuth } = useAuth();
 
     // Fonction de gestion de la soumission du formulaire d'inscription
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -81,6 +83,7 @@ export default function RegistrationPage() {
             // Si inscription ok redirection vers la page de partage de position
             // car l'utilisateur est automatiquement connecté après l'inscription
             if (response.ok) {
+                await refreshAuth(); // Met à jour l'état d'authentification après l'inscription
                 router.push('/share-location');
             } else {
                 const errorData = await response.json();

@@ -6,10 +6,12 @@
 import {useRouter} from 'next/navigation';
 import {useState} from "react";
 import {LogOut} from 'lucide-react';
+import {useAuth} from "@/components/auth/authContext";
 
 
 export function Logout() {
     const router = useRouter();
+    const { refreshAuth } = useAuth();
     const [isLoggingOut, setIsLoggingOut] = useState(false);
 
     const handleLogout = async () => {
@@ -24,16 +26,19 @@ export function Logout() {
             });
 
             if (response.ok) {
-                // Rediriger vers la page de connexion après une déconnexion réussie
-                router.push('/');
+                // Met à jour l'état d'authentification puis redirige vers l'accueil
+                await refreshAuth();
+                // Utilise window.location pour forcer un rechargement complet (évite les conflits de cache)
+                window.location.href = '/';
             } else {
-                console.error('Erreur lors de la déconnexion');
+                console.error('Erreur pendant la déconnexion');
+                setIsLoggingOut(false);
             }
         } catch (error) {
             console.error('Erreur lors de la déconnexion', error);
-        } finally {
-            setIsLoggingOut(false); // Réactive le bouton après la tentative de déconnexion
+            setIsLoggingOut(false);
         }
+        // On ne remet pas isLoggingOut à false car la page va se recharger
     };
 
     return (
