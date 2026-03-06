@@ -29,11 +29,11 @@ export function Burger() {
             {isMenuOpen && (
                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 p-2">
                     <Link href="/" className="block px-4 py-2 text-meetme-blue hover:bg-gray-100">Accueil</Link>
-                    <Link href="/Meet" className="block px-4 py-2 text-meetme-blue hover:bg-gray-100">Meet</Link>
-                    <Link href="/connect" className="block px-4 py-2 text-meetme-blue hover:bg-gray-100">Connexion</Link>
+                    <Link href="/share-location" className="block px-4 py-2 text-meetme-blue hover:bg-gray-100">Meet</Link>
+                    <Link href="/login" className="block px-4 py-2 text-meetme-blue hover:bg-gray-100">Connexion</Link>
 
                     {!isAuthenticated ? (
-                        <Link href="/registration" className="block px-4 py-2 text-meetme-blue hover:bg-gray-100">
+                        <Link href="/register" className="block px-4 py-2 text-meetme-blue hover:bg-gray-100">
                             Inscription
                         </Link>
                     ) : (
