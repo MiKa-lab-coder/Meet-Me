@@ -11,5 +11,12 @@ import {deleteAuthCookie} from "@/lib/httpOnly";
 // Route pour gérer la déconnexion de l'utilisateur
 export async function POST() {
     // Supprimer le token d'authentification de l'utilisateur en supprimant le cookie HTTP Only
-    await deleteAuthCookie();
+    try{
+        await deleteAuthCookie();
+
+        return NextResponse.json({message: "Déconnecté"}, {status: 200});
+    }catch (error){
+        return NextResponse.json({error: "Erreur lors de la déconnexion"}, {status: 500});
+    }
+
 }
