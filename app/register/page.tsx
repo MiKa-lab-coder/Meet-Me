@@ -76,7 +76,7 @@ export default function RegistrationPage() {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 // Envoi des données d'inscription dans le corps de la requête
-                body: JSON.stringify({username, email, password} as IRegistrationData),
+                body: JSON.stringify({username, email, password, confirmPassword} as IRegistrationData),
             });
             // Si inscription ok redirection vers la page de partage de position
             // car l'utilisateur est automatiquement connecté après l'inscription
