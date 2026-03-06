@@ -66,7 +66,9 @@ export function Header() {
                     )}
 
                     {/* Bouton Déconnexion: affiché si authentifié */}
-                    {isAuthenticated && <Logout />}
+                    {isAuthenticated && (
+                        <Logout />
+                    )}
                 </nav>
                 {/* Menu burger pour les écrans mobiles */}
                 <div
