@@ -28,23 +28,31 @@ interface MapsProps {
 
 export default function Maps({userPos, peerPos, isPaired}: MapsProps) {
     const [isClient, setIsClient] = useState(false);
+    const [mapKey, setMapKey] = useState(0);
+    const fallbackCenter: [number, number] = [48.8566, 2.3522];
 
     useEffect(() => {
         setIsClient(true);
-
 
         // Correction technique pour les icônes Leaflet qui "disparaissent" avec Next.js
         const L = require('leaflet');
         delete L.Icon.Default.prototype._getIconUrl;
         L.Icon.Default.mergeOptions({
-            iconRetinaUrl: '[https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png](https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png)',
-            iconUrl: '[https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png](https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png)',
-            shadowUrl: '[https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png](https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png)',
+            iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+            iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
         });
     }, []);
 
-// Affichage d'attente si la position n'est pas encore là
-    if (!isClient || !userPos) {
+    // Force le remontage de la carte quand userPos est disponible pour la première fois
+    useEffect(() => {
+        if (userPos && mapKey === 0) {
+            setMapKey(1);
+        }
+    }, [userPos, mapKey]);
+
+    // Affichage d'attente si la position n'est pas encore là
+    if (!isClient) {
         return (
             <div
                 className="h-[400px] w-full bg-gray-100 flex items-center justify-center rounded-lg border border-dashed border-gray-300">
@@ -53,27 +61,33 @@ export default function Maps({userPos, peerPos, isPaired}: MapsProps) {
         );
     }
 
+    const mapCenter = userPos ?? peerPos ?? fallbackCenter;
+
     return (
         <div className="h-[500px] w-full rounded-xl shadow-lg overflow-hidden border-2 border-white">
             <MapContainer
-                center={userPos}
+                key={mapKey}
+                center={mapCenter}
                 zoom={15}
                 scrollWheelZoom={true}
                 style={{height: '100%', width: '100%'}}
             >
+
                 {/* Couche de carte OpenStreetMap gratuite */}
                 <TileLayer
-                    attribution='&copy; <a href="[https://www.openstreetmap.org/copyright](https://www.openstreetmap.org/copyright)">OpenStreetMap</a> contributors'
+                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 />
 
                 {/* Marqueur de l'Utilisateur A */}
-                <Marker position={userPos}>
-                    <Popup>
-                        <span className="font-bold">Vous</span> <br/>
-                        Votre position actuelle.
-                    </Popup>
-                </Marker>
+                {userPos && (
+                    <Marker position={userPos}>
+                        <Popup>
+                            <span className="font-bold">Vous</span> <br/>
+                            Votre position actuelle.
+                        </Popup>
+                    </Marker>
+                )}
 
                 {/* Affichage conditionnel de l'Utilisateur B si le jumelage est actif */}
                 {isPaired && peerPos && (
