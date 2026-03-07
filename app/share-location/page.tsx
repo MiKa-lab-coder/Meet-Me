@@ -32,6 +32,27 @@ export default function SharingLocationPage() {
         return () => { newSocket.disconnect(); };
     }, []);
 
+    // Centre la carte sur la position de l'utilisateur avant tout jumelage
+    useEffect(() => {
+        if (!navigator.geolocation) {
+            return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                setUserPos([position.coords.latitude, position.coords.longitude]);
+            },
+            (error) => {
+                console.error('Impossible de récupérer la position initiale :', error.message);
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 30000,
+            }
+        );
+    }, []);
+
     // Fonctions de rappels pour les composants enfants
     const handlePairingSuccess = (id: string, code: string) => {
         setPairingId(id);
@@ -59,7 +80,8 @@ export default function SharingLocationPage() {
                 socket,
                 (partnerData) => setPeerPos([partnerData.location.lat, partnerData.location.lng]),
                 () => alert("Arrivés !"),
-                (err) => console.error(err)
+                (err) => console.error(err),
+                (position) => setUserPos(position) // Met à jour userPos en temps réel pendant le partage
             );
         }
     }, [isPaired, pairingCode, socket, userId]);
