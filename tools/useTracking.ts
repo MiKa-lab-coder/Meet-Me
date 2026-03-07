@@ -19,7 +19,8 @@ export const startSharingLocation = (
     socket: any,
     onPartnerMove: (position: ITracking) => void,
     onMeetSuccess: () => void,
-    onError: (error: string) => void
+    onError: (error: string) => void,
+    onSelfMove?: (position: [number, number]) => void // Callback pour mettre à jour la position locale
 ) => {
 
     // Vérifie que le navigateur supporte la géolocalisation
@@ -34,15 +35,15 @@ export const startSharingLocation = (
             const partnerPosition = packet.data as ITracking;
             onPartnerMove(partnerPosition);
 
-            // Logique de rencontre : vérifie si la distance entre les deux utilisateurs est dans le delta défini dans rules.json
+            // Logique de rencontre : vérifie si la distance entre les deux utilisateurs est dans le delta défini
             if (myLastPosition) {
                 const distance = getDistance(
                     {latitude: myLastPosition.location.lat, longitude: myLastPosition.location.lng},
                     {latitude: partnerPosition.location.lat, longitude: partnerPosition.location.lng}
                 );
 
-                if (distance <= (rules.rules.tracking.accuracy.max + 5)) {
-                    // +5m de marge pour compenser les imprécisions GPS
+                // Seuil de 12m : compromis optimal entre précision GPS et fiabilité de rencontre
+                if (distance <= 12) {
                     onMeetSuccess();
                     // On coupe le partage de position après la rencontre réussie
                     stopSharingLocation(socket, pairingCode, senderId);
@@ -66,6 +67,11 @@ export const startSharingLocation = (
                     accuracy: position.coords.accuracy,
                     timestamp: new Date().toISOString(),
                 };
+
+                // Met à jour la position locale sur la carte (callback vers page.tsx)
+                if (onSelfMove) {
+                    onSelfMove([position.coords.latitude, position.coords.longitude]);
+                }
 
                 // Envoie la position au serveur via WebSocket
                 const message: ISocketMessage = {
