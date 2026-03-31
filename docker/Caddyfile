@@ -1,5 +1,6 @@
-# On définit l'adresse (localhost pour le dev, ou ton domaine plus tard)
-:80 {
+# On définit l'adresse (localhost pour le dev, et le nom de domaine pour la prod)
+:80, {$APP_URL} {
+
 # Redirection vers le service "App" défini dans le docker-compose
 # Le port 3000 est le port par défaut de Next.js
     reverse_proxy app:3000
@@ -8,6 +9,7 @@
     encode gzip
 
 # Logs pour débugger facilement dans le terminal
+
     log {
             output stdout
         }
