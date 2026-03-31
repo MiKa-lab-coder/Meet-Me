@@ -6,11 +6,17 @@ services:
       # Ces variables servent uniquement à CRÉER la base au premier lancement
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      MONGO_DB_USER: ${MONGO_DB_USER}
+      MONGO_DB_PASSWORD: ${MONGO_DB_PASSWORD}
+      MONGO_DB_NAME: ${MONGO_DB_NAME}
+      MONGO_URI: ${MONGO_URI}
     ports:
-      - "27017:27017"
+      - "${PORT_MONGO_DEV}:-" # permet d'exposer le port en dev mais pas en prod (laisser vide en prod dans .env)
     volumes:
       - meet-me_data:/data/db
     restart: always
+    networks:
+        - mika-network
 
   app:
     container_name: front
@@ -26,26 +32,34 @@ services:
       MONGODB_URI: ${MONGODB_URI}
       JWT_SECRET: ${JWT_SECRET}
     ports:
-      - "3000:3000"
+      - "${PORT_APP_DEV}:-" # Expose le port 3000 en dev, pas en prod (laisser vide en prod dans .env)
     volumes:
       - .:/app
       - /app/node_modules # Protège les modules node du conteneur
     depends_on:
       - database
+    networks:
+      - mika-network
 
-  server:
+  server_dev:
     image: caddy:latest
-    container_name: caddy
+    container_name: caddy_dev
+    profiles:
+      - dev
+    environment:
+      - APP_URL=${APP_URL:-http://localhost} # URL de l'app en dev, utilisée dans le Caddyfile
     restart: always
     ports:
-      - "80:80"
-      - "443:443"
+      - "80:80" # HTTP
+      # - "443:443" # HTTPS inutile en dev mais nécessaire pour la prod
     volumes:
       - ./docker/Caddyfile:/etc/caddy/Caddyfile
       - caddy_data:/data
       - caddy_config:/config
     depends_on:
       - app
+    networks:
+      - mika-network
 
   mailer:
     container_name: mailing
@@ -61,3 +75,7 @@ volumes:
   meet-me_data:
   caddy_data:
   caddy_config:
+
+networks:
+  mika-network:
+    external: true
