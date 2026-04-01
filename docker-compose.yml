@@ -52,6 +52,7 @@ services:
       APP_ENV: ${APP_ENV}
       APP_URL: ${APP_URL}
       MONGODB_URI: ${MONGO_URI}
+      SQL_URI: ${SQL_URI}
       JWT_SECRET: ${JWT_SECRET}
     ports:
       - "${PORT_NODE_DEV:-3000}:3000" # Expose le port 3000 en dev, pas en prod (laisser vide en prod dans .env)
