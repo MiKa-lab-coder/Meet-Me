@@ -60,7 +60,12 @@ services:
       - .:/app
       - /app/node_modules # Protège les modules node du conteneur
     depends_on:
+      # Activer tout et dans le compose.override.yml, on rajoute les vrais besoins
       - database
+      - database-sql
+      - mailer
+      - back-php
+      - back-python
     networks:
       - mika-network
 

@@ -103,6 +103,13 @@ services:
       - /app/node_modules
     networks:
       - mika-network
+    depends_on:
+      # Activer tout et dans le compose.override.yml, on rajoute les vrais besoins
+      - database-nosql
+      - database-sql
+      - mailer
+      - back-php
+      - back-python
 
   # ==========================================
   # TOOLS (Caddy & Mailpit)
