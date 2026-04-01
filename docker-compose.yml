@@ -1,25 +1,47 @@
+# bdd
 services:
   database:
-    image: mongo:latest
+    image: mongo:7.0
     container_name: mongo
+    profiles: ["nosql"]
     environment:
       # Ces variables servent uniquement à CRÉER la base au premier lancement
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
-      MONGO_DB_USER: ${MONGO_DB_USER}
-      MONGO_DB_PASSWORD: ${MONGO_DB_PASSWORD}
+        # On passe aussi l'user limité pour le script d'init
+      MONGO_USER: ${MONGO_USERNAME}
+      MONGO_PASS: ${MONGO_PASSWORD}
       MONGO_DB_NAME: ${MONGO_DB_NAME}
-      MONGO_URI: ${MONGO_URI}
     ports:
-      - "${PORT_MONGO_DEV}:-" # permet d'exposer le port en dev mais pas en prod (laisser vide en prod dans .env)
+      - "${PORT_MONGO_DEV:-27017}:27017" # permet d'exposer le port en dev mais pas en prod (laisser vide en prod dans .env)
     volumes:
       - meet-me_data:/data/db
+      - ./docker/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro # Le script d'init est dans /docker sans sous-dossier
     restart: always
     networks:
         - mika-network
 
+# Pas de sql sur le projet mais présent pour montrer comment faire du multi-DB
+  database-sql:
+    image: mariadb:11.2
+    container_name: mysql_db
+    profiles: ["sql"]
+    environment:
+      MYSQL_ROOT_PASSWORD: ${SQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${SQL_DB_NAME}
+      MYSQL_USER: ${SQL_USERNAME}
+      MYSQL_PASSWORD: ${SQL_PASSWORD}
+    ports:
+      - "${PORT_SQL_DEV:-3306}:3306"
+    volumes:
+      - sql_data:/var/lib/mysql
+    networks:
+      - mika-network
+
+# front
   app:
     container_name: front
+    profiles: ["node"]
     build:
       context: . # IMPORTANT : On regarde tout le projet pour voir package.json
       dockerfile: ./docker/Node.Dockerfile
@@ -29,10 +51,10 @@ services:
       # On passe ici toutes les variables dont Next.js a besoin
       APP_ENV: ${APP_ENV}
       APP_URL: ${APP_URL}
-      MONGODB_URI: ${MONGODB_URI}
+      MONGODB_URI: ${MONGO_URI}
       JWT_SECRET: ${JWT_SECRET}
     ports:
-      - "${PORT_APP_DEV}:-" # Expose le port 3000 en dev, pas en prod (laisser vide en prod dans .env)
+      - "${PORT_NODE_DEV:-3000}:3000" # Expose le port 3000 en dev, pas en prod (laisser vide en prod dans .env)
     volumes:
       - .:/app
       - /app/node_modules # Protège les modules node du conteneur
@@ -41,13 +63,44 @@ services:
     networks:
       - mika-network
 
+# Back (non utilisé pour ce projet mais présent pour montrer comment faire du multi-back)
+  back-php:
+    build:
+      context: .
+      dockerfile: ./docker/PHP.Dockerfile
+    container_name: php_api
+    profiles: [ "php" ]
+    environment:
+      DATABASE_URL: ${SQL_URI}
+    ports:
+      - "${PORT_PHP_DEV:-8080}:80"
+    volumes:
+      - ./src-php:/var/www/html
+    networks:
+      - mika-network
+
+  back-python:
+    build:
+      context: .
+      dockerfile: ./docker/Python.Dockerfile
+    container_name: python_api
+    profiles: [ "python" ]
+    environment:
+      MONGODB_URI: ${MONGO_URI}
+    ports:
+      - "${PORT_PYTHON_DEV:-8000}:8000"
+    volumes:
+      - ./src-python:/app
+    networks:
+      - mika-network
+
+  # Service lancé seuleument en local. Sur vps un caddy est deja present et configuré pour faire du reverse proxy vers l'app
   server_dev:
     image: caddy:latest
     container_name: caddy_dev
-    profiles:
-      - dev
+    profiles: ["caddy-dev"]
     environment:
-      - APP_URL=${APP_URL:-http://localhost} # URL de l'app en dev, utilisée dans le Caddyfile
+      - APP_URL=${APP_URL:-http://localhost} # localhost en dev, URL de prod en prod
     restart: always
     ports:
       - "80:80" # HTTP
@@ -79,3 +132,23 @@ volumes:
 networks:
   mika-network:
     external: true
+
+# Pour créer le réseau externe : docker network create mika-network
+
+# Exemple :
+# stack Meet-Me
+#   - database (MongoDB)
+#   - app (Next.js)
+#   - server-dev (Caddy en dev pour faire du reverse proxy)
+#   - mailer (Mailpit pour intercepter les mails en dev)
+# dev => docker-compose --profile nosql --profile node --profile caddy-dev --profile mail -p meet-me up -d
+# prod => docker-compose --profile nosql --profile node -p meet-me up -d
+# En prod on laisse les ports vides dans le .env pour ne pas exposer les services directement,
+# on passe par le reverse proxy Caddy qui redirige vers les bons ports internes car chaque conteneeur possede une ip propre
+
+
+# Si ajout d'une DB SQL :
+# dev => docker-compose --profile nosql --profile sql --profile node --profile caddy-dev --profile mail -p meet-me up -d
+# prod => docker-compose --profile nosql --profile sql --profile node -p meet-me up -d
+
+# etc ...
