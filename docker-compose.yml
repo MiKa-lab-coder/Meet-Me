@@ -117,6 +117,7 @@ services:
   mailer:
     container_name: mailing
     image: axllent/mailpit
+    profiles: ["mail"]
     command: ["--smtp-auth-allow-insecure"]
     ports:
       - "1025:1025"
