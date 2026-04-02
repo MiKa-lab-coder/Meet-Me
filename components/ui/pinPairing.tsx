@@ -12,7 +12,7 @@ import React, { useState, useEffect } from "react";
 import { ValidateButton } from "@/components/ui/button";
 
 interface PinPairingProps {
-    onValidationSuccess: (code: string) => void;
+    onValidationSuccess: (id: string, code: string) => void;
 }
 
 export default function PinPairing({ onValidationSuccess }: PinPairingProps) {
@@ -41,8 +41,8 @@ export default function PinPairing({ onValidationSuccess }: PinPairingProps) {
             const data = await response.json();
             if (!response.ok) throw new Error(data.error || 'Code invalide');
 
-            // Succès : on prévient la page avec le code validé
-            onValidationSuccess(pairingCode);
+            // Succès : on remonte l'ID et le code pour permettre l'arrêt côté receveur
+            onValidationSuccess(data.pairing.id, data.pairing.pairingCode);
         } catch (err: any) {
             setError(err.message);
         } finally {
