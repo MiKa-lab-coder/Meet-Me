@@ -21,14 +21,14 @@ export async function middleware(request: NextRequest) {
     const token = await getAuthToken();
 
     if (!token) {
-        return NextResponse.redirect(new URL('/auth/login', request.url));
+        return NextResponse.redirect(new URL('/login', request.url));
     }
 
     try {
         await verifyToken(token);
         return NextResponse.next();
     } catch (error) {
-        return NextResponse.redirect(new URL('/auth/login', request.url));
+        return NextResponse.redirect(new URL('/login', request.url));
     }
 }
 
