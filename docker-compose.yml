@@ -116,17 +116,6 @@ services:
     networks:
       - mika-network
 
-  mailer:
-    container_name: mailing
-    image: axllent/mailpit
-    profiles: ["mail"]
-    command: ["--smtp-auth-allow-insecure"]
-    ports:
-      - "1025:1025"
-      - "8025:8025"
-    environment:
-      MP_SMTP_AUTH_ACCEPT_ANY: 1
-
 volumes:
   meet-me_data:
   caddy_data:
