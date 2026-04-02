@@ -111,6 +111,7 @@ export async function POST(request: Request) {
 
     } catch (error) {
         // En cas d'erreur, on retourne une réponse JSON avec un statut 500 (Internal Server Error)
+        //console.log("detail de 500 :",error);
         return NextResponse.json({error: "Une erreur est survenue pendant l'inscription"}, {status: 500});
     }
 }
