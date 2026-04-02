@@ -9,8 +9,8 @@ services:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
         # On passe aussi l'user limité pour le script d'init
-      MONGO_USER: ${MONGO_USERNAME}
-      MONGO_PASS: ${MONGO_PASSWORD}
+      MONGO_USERNAME: ${MONGO_USERNAME}
+      MONGO_PASSWORD: ${MONGO_PASSWORD}
       MONGO_DB_NAME: ${MONGO_DB_NAME}
     ports:
       - "${PORT_MONGO_DEV:-27017}:27017" # permet d'exposer le port en dev mais pas en prod (laisser vide en prod dans .env)
@@ -54,18 +54,14 @@ services:
       MONGODB_URI: ${MONGO_URI}
       SQL_URI: ${SQL_URI}
       JWT_SECRET: ${JWT_SECRET}
-    ports:
-      - "${PORT_NODE_DEV:-3000}:3000" # Expose le port 3000 en dev, pas en prod (laisser vide en prod dans .env)
+    #ports:
+      #- "${PORT_NODE_DEV:-3000}:3000" # Expose le port 3000 en dev, pas en prod (laisser vide en prod dans .env)
     volumes:
       - .:/app
       - /app/node_modules # Protège les modules node du conteneur
-    depends_on:
-      # Activer tout et dans le compose.override.yml, on rajoute les vrais besoins
-      - database
-      - database-sql
-      - mailer
-      - back-php
-      - back-python
+
+      # Depend on se trouve dans override
+
     networks:
       - mika-network
 
