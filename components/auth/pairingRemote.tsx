@@ -51,7 +51,10 @@ export default function PairingRemote({
     };
 
     const handleUnpairing = async () => {
-        if (!pairingId) return;
+        if (!pairingId) {
+            setError("Impossible d'arrêter: identifiant de session introuvable.");
+            return;
+        }
         setIsLoading(true);
         try {
             const response = await fetch('/api/core/pairing', {
