@@ -7,12 +7,12 @@ import nodemailer from 'nodemailer';
 
 const transporter = nodemailer.createTransport({
     // Verification de l'environnement pour savoir si on est en production ou en developpement
-    host: process.env.NODE_ENV === 'production' ? 'ssl0.ovh.net' : 'localhost',
-    port: process.env.NODE_ENV === 'production' ? 465 : 1025,
-    secure: process.env.NODE_ENV === 'production',
+    host: process.env.MAIL_HOST || 'ssl0.ovh.net',
+    port: Number(process.env.MAIL_PORT) || 465,
+    secure: process.env.MAIL_PORT === '465', // true pour 465, false pour les autres ports
     auth: {
-        user: process.env.MAIL_USER,
-        pass: process.env.MAIL_PASS,
+        user: process.env.MAIL_USERNAME,
+        pass: process.env.MAIL_PASSWORD,
     },
 });
 
@@ -23,10 +23,10 @@ interface MailData {
 }
 
 export async function sendPairingCodeEmail({to, pairingCode, magicToken}: MailData) {
-    const magicLink = `${process.env.app_URL}/api/core/pairing?pairingCode=${pairingCode}&magicToken=${magicToken}`;
+    const magicLink = `${process.env.APP_URL}/api/core/pairing?pairingCode=${pairingCode}&magicToken=${magicToken}`;
 
     const mailOptions = {
-        from: `"Meet-Me" <${process.env.MAIL_USER}>`,
+        from: `"Meet-Me" <${process.env.MAIL_USERNAME}>`,
         to: to,
         subject: `Accès au suivi GPS : ${pairingCode}`,
         html: `
