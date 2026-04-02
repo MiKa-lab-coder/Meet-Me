@@ -2,7 +2,6 @@ services:
   app:
     depends_on:
       - database
-      - mailer
       # si besoin de la base SQL,ou d'autre service, on les rajoute ici
       # - database-sql
       # - back-php
