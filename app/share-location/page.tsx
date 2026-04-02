@@ -27,8 +27,19 @@ export default function SharingLocationPage() {
     // Récupérer l'identité de l'utilisateur au démarrage
     useEffect(() => {
         fetch('/api/auth/me').then(res => res.json()).then(data => setUserId(data.userId));
-        const newSocket = io(process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3000');
+
+        // Réveil du serveur WebSocket et connexion du client
+        /*fetch('/api/socket/io')
+            .then(r => console.log('serveur WebSocket réveillé'))
+            .catch(err => console.error('Erreur lors du réveil du serveur WebSocket :', err));*/
+
+        // Connexion du client Socket.IO au serveur WebSocket
+        const newSocket = io({path:'/api/socket/io', addTrailingSlash:false});
+
+        // Stockage de l'instance du client Socket.IO pour une utilisation ultérieure
         setSocket(newSocket);
+
+        // Nettoyage à la fermeture du composant : déconnexion du client Socket.IO pour libérer les ressources serveur
         return () => { newSocket.disconnect(); };
     }, []);
 
