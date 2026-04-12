@@ -65,6 +65,24 @@ services:
     networks:
       - mika-network
 
+# WebSocket (Socket.IO standalone, séparé de Next.js pour compatibilité Next 16+)
+  socket:
+    container_name: socket_server
+    profiles: ["node"]
+    build:
+      context: .
+      dockerfile: ./docker/Socket.Dockerfile
+    restart: always
+    working_dir: /app
+    environment:
+      APP_URL: ${APP_URL}
+      SOCKET_PORT: 3001
+    volumes:
+      - .:/app
+      - /app/node_modules
+    networks:
+      - mika-network
+
 # Back (non utilisé pour ce projet mais présent pour montrer comment faire du multi-back)
   back-php:
     build:
@@ -113,6 +131,7 @@ services:
       - caddy_config:/config
     depends_on:
       - app
+      - socket
     networks:
       - mika-network
 

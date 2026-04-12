@@ -28,13 +28,21 @@ export default function SharingLocationPage() {
     useEffect(() => {
         fetch('/api/auth/me').then(res => res.json()).then(data => setUserId(data.userId));
 
-        // Réveil du serveur WebSocket et connexion du client
-        /*fetch('/api/socket/io')
-            .then(r => console.log('serveur WebSocket réveillé'))
-            .catch(err => console.error('Erreur lors du réveil du serveur WebSocket :', err));*/
+        // Connexion du client Socket.IO au serveur WebSocket standalone
+        const newSocket = io({
+            transports: ['websocket', 'polling'],
+            reconnection: true,
+            reconnectionAttempts: 5,
+            reconnectionDelay: 1000,
+        });
 
-        // Connexion du client Socket.IO au serveur WebSocket
-        const newSocket = io({path:'/api/socket/io', addTrailingSlash:false});
+        newSocket.on('connect', () => {
+            console.log('Socket.IO connecté');
+        });
+
+        newSocket.on('connect_error', (err) => {
+            console.error('Erreur de connexion Socket.IO :', err.message);
+        });
 
         // Stockage de l'instance du client Socket.IO pour une utilisation ultérieure
         setSocket(newSocket);
@@ -85,7 +93,7 @@ export default function SharingLocationPage() {
     // Lancer le tracker GPS/Socket quand isPaired devient vrai
     useEffect(() => {
         if (isPaired && pairingCode && socket && userId) {
-            startSharingLocation(
+            const cleanup = startSharingLocation(
                 pairingCode,
                 userId,
                 socket,
@@ -94,6 +102,9 @@ export default function SharingLocationPage() {
                 (err) => console.error(err),
                 (position) => setUserPos(position) // Met à jour userPos en temps réel pendant le partage
             );
+
+            // Nettoyage des listeners et du watchPosition au démontage
+            return cleanup;
         }
     }, [isPaired, pairingCode, socket, userId]);
 
