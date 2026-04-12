@@ -1,9 +1,16 @@
 # On définit l'adresse (localhost pour le dev, et le nom de domaine pour la prod)
 :80, {$APP_URL} {
 
+# WebSocket : route le trafic Socket.IO vers le serveur standalone
+    handle /socket.io/* {
+        reverse_proxy socket:3001
+    }
+
 # Redirection vers le service "App" défini dans le docker-compose
 # Le port 3000 est le port par défaut de Next.js
-    reverse_proxy app:3000
+    handle {
+        reverse_proxy app:3000
+    }
 
 # Compression pour de meilleures performances (PWA friendly)
     encode gzip
