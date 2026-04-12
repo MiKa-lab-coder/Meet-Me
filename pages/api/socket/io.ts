@@ -9,7 +9,6 @@
 
 import { Server } from 'socket.io';
 import { socketTunnel } from '@/lib/socket';
-import {io} from "socket.io-client";
 
 export const config = {
     api: {

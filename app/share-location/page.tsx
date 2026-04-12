@@ -112,7 +112,8 @@ export default function SharingLocationPage() {
                 />
 
                 {!isPaired && (
-                    <PinPairing onValidationSuccess={(code) => {
+                    <PinPairing onValidationSuccess={(id, code) => {
+                        setPairingId(id);
                         setPairingCode(code);
                         setIsPaired(true);
                     }} />

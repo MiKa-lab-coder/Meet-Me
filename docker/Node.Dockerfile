@@ -16,8 +16,13 @@ RUN npm install
 # Copie le reste des fichiers du projet
 COPY . .
 
+# Création d'un utilisateur non-root pour la sécurité
+RUN addgroup -g 1001 -S nodejs && adduser -S nextjs -u 1001
+USER nextjs
+
 # On expose le port 3000
 EXPOSE 3000
 
-# Commande par défaut (Next.js start pour la "prod" ou dev pour le confort)
-CMD ["npm", "run", "dev"]
+# En dev : hot-reload via npm run dev
+# En prod : build optimisé puis start
+CMD if [ "$APP_ENV" = "prod" ]; then npm run build && npm start; else npm run dev; fi

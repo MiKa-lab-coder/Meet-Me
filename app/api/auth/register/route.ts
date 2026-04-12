@@ -70,12 +70,17 @@ export async function POST(request: Request) {
         // verification que l'utilisateur et l'email n'existent pas déjà dans la base de données
         const client = await clientPromise;
         const db = client.db();
-        const existingUser = await db.collection('users').findOne({$or: [{username: data.username}]});
-        if (existingUser) {
-            return NextResponse.json({error: "Le nom d'utilisateur existe déjà"}, {status: 400});
+        // Vérification combinée username/email avec des valeurs strictement string (pas d'opérateurs MongoDB)
+        if (typeof data.username !== 'string' || typeof data.email !== 'string') {
+            return NextResponse.json({error: "Données invalides"}, {status: 400});
         }
-        const existingEmail = await db.collection('users').findOne({$or: [{email: data.email}]});
-        if (existingEmail) {
+        const existingUser = await db.collection('users').findOne({
+            $or: [{username: data.username}, {email: data.email}]
+        });
+        if (existingUser) {
+            if (existingUser.username === data.username) {
+                return NextResponse.json({error: "Le nom d'utilisateur existe déjà"}, {status: 400});
+            }
             return NextResponse.json({error: "L'email existe déjà"}, {status: 400});
         }
 
@@ -86,7 +91,7 @@ export async function POST(request: Request) {
          * npm install --save-dev @types/bcryptjs car ici on utilise TypeScript
          */
         // Le mot de passe est hashé avec un coût de 10 (le nombre de rounds de salage)
-        finalData.password = await bcrypt.hash(data.password, 10);
+        finalData.password = await bcrypt.hash(data.password, 12);
 
         // Si toutes les validations passent, on peut procéder à l'inscription de l'utilisateur
         const saveUser = await db.collection('users').insertOne

@@ -1,11 +1,10 @@
 "use client";
 
-import {use} from "react";
-import {AuthContext} from "@/components/auth/authContext";
+import {useAuth} from "@/components/auth/authContext";
 import {Users, Mail, Navigation2, ShieldCheck} from "lucide-react";
 
 export default function Home() {
-  const {isAuthenticated} = use(AuthContext);
+  const {isAuthenticated} = useAuth();
 
   return (
       <div className="flex flex-col gap-10 py-6 max-w-md mx-auto">
