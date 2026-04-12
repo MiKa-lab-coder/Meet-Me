@@ -38,14 +38,19 @@ export async function POST(request: Request) {
         // Verification de l'existence de l'utilisateur dans la base de données
         const client = await clientPromise;
         const db = client.db();
+        // Sanitize : s'assurer que username est bien une string (pas un opérateur MongoDB)
+        if (typeof data.username !== 'string' || typeof data.password !== 'string') {
+            return NextResponse.json({error: "Identifiants invalides"}, {status: 401});
+        }
         const user = await db.collection("users").findOne({username: data.username});
+        // Message d'erreur identique pour user introuvable et mauvais mot de passe (anti-énumération)
         if (!user) {
-            return NextResponse.json({error: "Utilisateur non trouvé"}, {status: 404});
+            return NextResponse.json({error: "Identifiants incorrects"}, {status: 401});
         }
         // Verification du mot de passe en utilisant bcrypt
         const isPasswordValid = await bcrypt.compare(data.password, user.password);
         if (!isPasswordValid) {
-            return NextResponse.json({error: "Mot de passe incorrect"}, {status: 401});
+            return NextResponse.json({error: "Identifiants incorrects"}, {status: 401});
         }
         //Verification de l'existence d'un token d'authentification dans les cookies HTTP Only
         const existingToken = await getAuthToken();

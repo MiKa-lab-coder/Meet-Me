@@ -4,7 +4,7 @@
  */
 "use client";
 import Link from 'next/link';
-import {useState, useEffect, useContext} from "react";
+import {useState} from "react";
 import {useRouter} from 'next/navigation';
 import {usePathname} from "next/navigation";
 import {Burger} from "@/components/ui/burger";

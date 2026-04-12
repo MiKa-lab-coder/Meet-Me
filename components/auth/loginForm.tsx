@@ -24,16 +24,20 @@ export function LoginForm({onSubmit, error,isLoading}: LoginFormProps) {
                 </div>
             )}
 
+            <label htmlFor="login-username" className="sr-only">Nom d&apos;utilisateur</label>
             <input
-                name="username" // Important pour récupérer la valeur facilement
+                id="login-username"
+                name="username"
                 type="text"
                 placeholder="Nom d'utilisateur"
                 className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-meetme-blue"
-                autoComplete="username" // Permet au navigateur de proposer les bonnes suggestions
+                autoComplete="username"
                 required
             />
 
+            <label htmlFor="login-password" className="sr-only">Mot de passe</label>
             <input
+                id="login-password"
                 name="password"
                 type="password"
                 placeholder="Mot de passe"

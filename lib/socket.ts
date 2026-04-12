@@ -53,8 +53,32 @@ export const socketTunnel = (io: Server) => {
 
         /**
          * Reçoit le message (IsocketMessage) d'un client et le retransmet à tous les autres clients de la "Room"
+         * Validation du format avant retransmission
          */
         socket.on('message', (packet: ISocketMessage) => {
+            // Validation de la structure du message
+            if (!packet || !packet.pairingCode || !packet.senderId || !packet.type) {
+                socket.emit('error', 'Format de message invalide');
+                return;
+            }
+
+            // Validation du type de message
+            if (packet.type !== 'LOCATION_UPDATE' && packet.type !== 'SESSION_END') {
+                socket.emit('error', 'Type de message inconnu');
+                return;
+            }
+
+            // Validation basique des coordonnées pour les mises à jour de position
+            if (packet.type === 'LOCATION_UPDATE' && packet.data && typeof packet.data === 'object') {
+                const tracking = packet.data as ITracking;
+                if (!tracking.location ||
+                    tracking.location.lat < -90 || tracking.location.lat > 90 ||
+                    tracking.location.lng < -180 || tracking.location.lng > 180) {
+                    socket.emit('error', 'Coordonnées invalides');
+                    return;
+                }
+            }
+
             console.log(`Message reçu de ${socket.id} pour la salle ${packet.pairingCode} : ${packet.type}`);
 
             // socket.to() = envoie à la "Room" spécifiée (exclut l'émetteur)

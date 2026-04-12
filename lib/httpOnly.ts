@@ -25,7 +25,7 @@ export async function setAuthCookie(token: string) {
     cookieStore.set(httpOnlyCookie.name, token, {
         ...httpOnlyCookie.options,
         // Le cookie est sécurisé (transmis uniquement via HTTPS) en production, mais pas en développement pour faciliter les tests
-        secure: process.env.APP_ENVIRONMENT === 'prod',
+        secure: process.env.APP_ENV === 'prod',
     });
 }
 // Fonction pour supprimer le cookie d'authentification

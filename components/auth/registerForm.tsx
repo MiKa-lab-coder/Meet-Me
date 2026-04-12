@@ -25,35 +25,47 @@ export function RegisterForm({onSubmit, onCancel, error, isLoading}: RegisterFor
                 </div>
             )}
             {/* Les champs du formulaire d'enregistrement */}
+            <label htmlFor="reg-username" className="sr-only">Nom d&apos;utilisateur</label>
             <input
+                id="reg-username"
                 name="username"
                 type="text"
                 placeholder="Nom d'utilisateur"
                 className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-meetme-blue"
+                autoComplete="username"
                 required
             />
 
+            <label htmlFor="reg-email" className="sr-only">Adresse e-mail</label>
             <input
+                id="reg-email"
                 name="email"
                 type="email"
                 placeholder="Adresse e-mail"
                 className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-meetme-blue"
+                autoComplete="email"
                 required
             />
 
+            <label htmlFor="reg-password" className="sr-only">Mot de passe</label>
             <input
+                id="reg-password"
                 name="password"
                 type="password"
                 placeholder="Mot de passe"
                 className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-meetme-blue"
+                autoComplete="new-password"
                 required
             />
 
+            <label htmlFor="reg-confirm" className="sr-only">Confirmer le mot de passe</label>
             <input
+                id="reg-confirm"
                 name="confirmPassword"
                 type="password"
                 placeholder="Confirmer le mot de passe"
                 className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-meetme-blue"
+                autoComplete="new-password"
                 required
             />
             {/* Utilisation des boutons de validation et d'annulation */}
