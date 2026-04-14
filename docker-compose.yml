@@ -54,8 +54,8 @@ services:
       MONGODB_URI: ${MONGO_URI}
       SQL_URI: ${SQL_URI}
       JWT_SECRET: ${JWT_SECRET}
-    #ports:
-      #- "${PORT_NODE_DEV:-3000}:3000" # Expose le port 3000 en dev, pas en prod (laisser vide en prod dans .env)
+    ports:
+      - "${PORT_NODE_DEV:-3000}:3000" # Expose le port 3000 en dev, pas en prod (laisser vide en prod dans .env)
     volumes:
       - .:/app
       - /app/node_modules # Protège les modules node du conteneur
@@ -68,7 +68,7 @@ services:
 # WebSocket (Socket.IO standalone, séparé de Next.js pour compatibilité Next 16+)
   socket:
     container_name: socket_server
-    profiles: ["node"]
+    profiles: ["socket"]
     build:
       context: .
       dockerfile: ./docker/Socket.Dockerfile
@@ -120,7 +120,7 @@ services:
     container_name: caddy_dev
     profiles: ["caddy-dev"]
     environment:
-      - APP_URL=${APP_URL:-http://localhost} # localhost en dev, URL de prod en prod
+      - APP_URL=${APP_URL:-http://localhost:3000} # localhost en dev, URL de prod en prod
     restart: always
     ports:
       - "80:80" # HTTP
