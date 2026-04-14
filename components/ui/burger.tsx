@@ -4,15 +4,15 @@
  * Le menu peut être fermé en cliquant à nouveau sur l'icône ou en cliquant en dehors du menu.
  */
 import Link from 'next/link';
-import {useState, use} from "react";
+import {useState} from "react";
 import {Logout} from "@/components/ui/logout";
-import {AuthContext} from "@/components/auth/authContext";
+import {useAuth} from "@/components/auth/authContext";
 import {Menu, X} from 'lucide-react';
 
 // Composant Burger pour la navigation mobile
 export function Burger() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const {isAuthenticated} = use(AuthContext);
+    const {isAuthenticated} = useAuth();
 
     // Fonction pour basculer l'état du menu ouvert/fermé
     const toggleMenu = () => {
@@ -28,18 +28,22 @@ export function Burger() {
 
             {isMenuOpen && (
                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 p-2">
-                    <Link href="/" className="block px-4 py-2 text-meetme-blue hover:bg-gray-100">Accueil</Link>
-                    <Link href="/share-location" className="block px-4 py-2 text-meetme-blue hover:bg-gray-100">Meet</Link>
-                    <Link href="/login" className="block px-4 py-2 text-meetme-blue hover:bg-gray-100">Connexion</Link>
+                    <Link href="/" onClick={() => setIsMenuOpen(false)} className="block px-4 py-2 text-meetme-blue hover:bg-gray-100">Accueil</Link>
 
-                    {!isAuthenticated ? (
-                        <Link href="/register" className="block px-4 py-2 text-meetme-blue hover:bg-gray-100">
-                            Inscription
-                        </Link>
+                    {isAuthenticated ? (
+                        <>
+                            <Link href="/share-location" onClick={() => setIsMenuOpen(false)} className="block px-4 py-2 text-meetme-blue hover:bg-gray-100">Meet-Me</Link>
+                            <div className="border-t border-gray-100 mt-2 pt-2">
+                                <Logout/>
+                            </div>
+                        </>
                     ) : (
-                        <div className="border-t border-gray-100 mt-2 pt-2">
-                            <Logout/>
-                        </div>
+                        <>
+                            <Link href="/login" onClick={() => setIsMenuOpen(false)} className="block px-4 py-2 text-meetme-blue hover:bg-gray-100">Connexion</Link>
+                            <Link href="/register" onClick={() => setIsMenuOpen(false)} className="block px-4 py-2 text-meetme-blue hover:bg-gray-100">
+                                Inscription
+                            </Link>
+                        </>
                     )}
                 </div>
             )}
