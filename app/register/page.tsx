@@ -100,12 +100,7 @@ export default function RegistrationPage() {
     const handleCancel = () => {
         const confirmCancel = window.confirm('Êtes-vous sûr de vouloir annuler votre inscription ?');
         if (confirmCancel) {
-            // Réinitialisation du formulaire et redirection vers la page d'accueil
-            const data = new FormData();
-            data.append('username', '');
-            data.append('email', '');
-            data.append('password', '');
-            data.append('confirmPassword', '');
+            // redirection vers la page d'accueil
             router.push('/');
         }
     }
