@@ -8,7 +8,7 @@
 
 import { createServer } from 'http';
 import { Server } from 'socket.io';
-import { socketTunnel } from '../lib/socket';
+import { socketTunnel } from '@/lib/socket';
 
 const PORT = Number(process.env.SOCKET_PORT) || 3001;
 const APP_URL = process.env.APP_URL || '*';
