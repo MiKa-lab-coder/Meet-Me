@@ -4,16 +4,12 @@
  */
 "use client";
 import Link from 'next/link';
-import {useState} from "react";
-import {useRouter} from 'next/navigation';
 import {usePathname} from "next/navigation";
 import {Burger} from "@/components/ui/burger";
 import {Logout} from "@/components/ui/logout";
 import {useAuth} from "@/components/auth/authContext";
 
 export function Header() {
-    const router = useRouter();
-    const [isMenuOpen, setIsMenuOpen] = useState(false);
     const {isAuthenticated} = useAuth();
     const pathname = usePathname();
     const logo = "/logo.png"; // Chemin vers le logo de l'application dans le dossier public
@@ -71,10 +67,7 @@ export function Header() {
                     )}
                 </nav>
                 {/* Menu burger pour les écrans mobiles */}
-                <div
-                    className="md:hidden text-meetme-blue cursor-pointer"
-                    onClick={() => setIsMenuOpen(!isMenuOpen)}
-                >
+                <div className="md:hidden">
                     <Burger/>
                 </div>
             </div>
