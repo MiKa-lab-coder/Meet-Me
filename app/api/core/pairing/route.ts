@@ -39,8 +39,10 @@ export async function POST(request: Request) {
             return NextResponse.json({error: 'Utilisateur cible introuvable'}, {status: 404});
         }
 
-        // Génération d'un code de pairing aléatoire et d'un magic token unique
-        const pairingCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+        // Génération cryptographiquement sûre du code de pairing (Math.random() n'est pas sécurisé)
+        const bytes = new Uint8Array(4);
+        crypto.getRandomValues(bytes);
+        const pairingCode = Array.from(bytes).map(b => b.toString(36)).join('').substring(0, 6).toUpperCase();
         const magicToken = crypto.randomUUID();
 
         // Utilisation d'objets Date natifs pour la précision et MongoDB
@@ -59,11 +61,16 @@ export async function POST(request: Request) {
         });
 
         // Envoi de l'email à l'utilisateur cible avec le code de pairing et le lien magique
-        await sendPairingCodeEmail({
+        const emailResult = await sendPairingCodeEmail({
             to: userB.email,
             pairingCode,
             magicToken,
         });
+
+        if (!emailResult) {
+            await db.collection('pairings').deleteOne({_id: newPairing.insertedId}); // Nettoyage en cas d'échec de l'email
+            return NextResponse.json({error: 'Echec de l\'envoi de l\'email'}, {status: 500});
+        }
 
         return NextResponse.json({
             message: 'Pairing créé avec succès',
@@ -76,7 +83,8 @@ export async function POST(request: Request) {
         }, {status: 201});
 
     } catch (error) {
-        return NextResponse.json({error: 'Echec de la création du pairing'}, {status: 400});
+        console.error('échec de la création du pairing', error);
+        return NextResponse.json({error: 'Échec de la création du pairing'}, {status: 400});
     }
 }
 
@@ -138,6 +146,7 @@ export async function PATCH(request: Request) {
         }, {status: 200});
 
     } catch (error) {
+        console.error('Erreur lors de la validation du pairing', error);
         return NextResponse.json({error: 'Erreur technique lors de la validation'}, {status: 500});
     }
 }
@@ -199,6 +208,11 @@ export async function DELETE(request: Request) {
             return NextResponse.json({error: 'ID de pairing requis'}, {status: 400});
         }
 
+        // Validation du format ObjectId avant utilisation (évite une exception non gérée)
+        if (!ObjectId.isValid(pairingId)) {
+            return NextResponse.json({error: 'ID de pairing invalide'}, {status: 400});
+        }
+
         const token = await getAuthToken();
         if (!token) return NextResponse.json({error: 'Non autorisé'}, {status: 401});
         const user = await verifyToken(token);
@@ -234,6 +248,7 @@ export async function DELETE(request: Request) {
         return NextResponse.json({message: 'Pairing terminé avec succès'}, {status: 200});
 
     } catch (error) {
+        console.error('Erreur lors de la fin du pairing', error);
         return NextResponse.json({error: 'Erreur technique lors de la suppression du pairing'}, {status: 500});
     }
 }
