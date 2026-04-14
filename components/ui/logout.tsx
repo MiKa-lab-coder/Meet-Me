@@ -44,7 +44,8 @@ export function Logout() {
     return (
         <button
             onClick={handleLogout}
-            className="flex items-center space-x-2 text-meetme-red  hover:font-bold focus:outline-none "
+            className="flex items-center space-x-2 text-meetme-red hover:font-bold focus:outline-none
+             focus:ring-2 focus:ring-meetme-red focus:ring-offset-2 rounded"
             disabled={isLoggingOut}
         >
             <LogOut size={20}/>
