@@ -1,0 +1,4 @@
+# Image Caddy custom : Caddyfile.prod baked dedans
+# Obligatoire sur Coolify (bind mounts convertis en volumes vides)
+FROM caddy:latest
+COPY docker/server/Caddyfile.prod /etc/caddy/Caddyfile

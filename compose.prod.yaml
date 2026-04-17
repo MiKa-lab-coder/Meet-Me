@@ -1,0 +1,94 @@
+# Prod Coolify — fichier autonome, 100% self-contained
+# Coolify : pointer CE fichier dans "Docker Compose Location"
+# Variables définies dans l'interface Coolify (pas de .env en prod)
+#
+# Variables requises dans Coolify :
+#   APP_URL             → https://meet-me.mondomaine.com
+#   APP_DOMAIN          → meet-me.mondomaine.com  (hostname seul, pour Traefik)
+#   MONGO_URI           → mongodb://appuser:PASSWORD@mongodb:27017/meet_me_db?authSource=admin
+#   JWT_SECRET
+#   MONGO_INITDB_ROOT_USERNAME
+#   MONGO_INITDB_ROOT_PASSWORD
+#   MONGO_USERNAME
+#   MONGO_PASSWORD
+#   MONGO_DB_NAME
+
+services:
+
+  app:
+    container_name: meet-me-app
+    build:
+      context: .
+      dockerfile: docker/node/Dockerfile.prod
+    restart: always
+    environment:
+      APP_ENV: production
+      APP_URL: ${APP_URL}
+      MONGODB_URI: ${MONGO_URI}
+      JWT_SECRET: ${JWT_SECRET}
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000"]
+      interval: 10s
+      retries: 10
+      start_period: 60s
+    depends_on:
+      mongodb:
+        condition: service_started
+
+  socket:
+    container_name: meet-me-socket
+    build:
+      context: .
+      dockerfile: docker/socket/Dockerfile.prod
+    restart: always
+    environment:
+      APP_URL: ${APP_URL}
+      SOCKET_PORT: 3001
+    depends_on:
+      - app
+
+  mongodb:
+    container_name: meet-me-mongo
+    build:
+      context: .
+      dockerfile: docker/mongo/Dockerfile
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      MONGO_USERNAME: ${MONGO_USERNAME}
+      MONGO_PASSWORD: ${MONGO_PASSWORD}
+      MONGO_DB_NAME: ${MONGO_DB_NAME}
+    volumes:
+      - meet-me_data:/data/db
+
+  caddy:
+    build:
+      context: .
+      dockerfile: docker/server/Dockerfile.caddy
+    container_name: meet-me-caddy
+    restart: unless-stopped
+    volumes:
+      - caddy_data:/data
+      - caddy_config:/config
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.meet-me.rule=Host(`${APP_DOMAIN}`)"
+      - "traefik.http.routers.meet-me.tls=true"
+      - "traefik.http.routers.meet-me.tls.certresolver=letsencrypt"
+      - "traefik.http.services.meet-me.loadbalancer.server.port=80"
+    networks:
+      - default
+      - coolify
+    depends_on:
+      app:
+        condition: service_healthy
+
+volumes:
+  meet-me_data:
+  caddy_data:
+  caddy_config:
+
+networks:
+  coolify:
+    external: true

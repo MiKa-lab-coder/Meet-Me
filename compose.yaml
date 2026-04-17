@@ -1,0 +1,92 @@
+# Dev local — bind mounts, hot reload, ports exposés
+# Lancement : docker compose --profile nosql --profile node --profile socket --profile caddy-dev -p meet-me up -d
+
+services:
+
+  database:
+    image: mongo:7.0
+    container_name: meet-me-mongo
+    profiles: ["nosql"]
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      MONGO_USERNAME: ${MONGO_USERNAME}
+      MONGO_PASSWORD: ${MONGO_PASSWORD}
+      MONGO_DB_NAME: ${MONGO_DB_NAME}
+    ports:
+      - "${PORT_MONGO_DEV:-27017}:27017"
+    volumes:
+      - meet-me_data:/data/db
+      - ./docker/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    networks:
+      - mika-network
+
+  app:
+    container_name: meet-me-app
+    profiles: ["node"]
+    build:
+      context: .
+      dockerfile: ./docker/Node.Dockerfile
+    restart: always
+    working_dir: /app
+    environment:
+      APP_ENV: ${APP_ENV}
+      APP_URL: ${APP_URL}
+      MONGODB_URI: ${MONGO_URI}
+      JWT_SECRET: ${JWT_SECRET}
+    ports:
+      - "${PORT_NODE_DEV:-3000}:3000"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    depends_on:
+      - database
+      - socket
+    networks:
+      - mika-network
+
+  socket:
+    container_name: meet-me-socket
+    profiles: ["socket"]
+    build:
+      context: .
+      dockerfile: ./docker/Socket.Dockerfile
+    restart: always
+    working_dir: /app
+    environment:
+      APP_URL: ${APP_URL}
+      SOCKET_PORT: 3001
+    volumes:
+      - .:/app
+      - /app/node_modules
+    networks:
+      - mika-network
+
+  server_dev:
+    image: caddy:latest
+    container_name: meet-me-caddy-dev
+    profiles: ["caddy-dev"]
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+      - ./docker/Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - app
+      - socket
+    networks:
+      - mika-network
+
+volumes:
+  meet-me_data:
+  caddy_data:
+  caddy_config:
+
+networks:
+  mika-network:
+    external: true
+
+# Créer le réseau une fois : docker network create mika-network
