@@ -1,9 +1,0 @@
-services:
-  app:
-    depends_on:
-      - database
-      - socket
-      # si besoin de la base SQL,ou d'autre service, on les rajoute ici
-      # - database-sql
-      # - back-php
-      # - back-python
