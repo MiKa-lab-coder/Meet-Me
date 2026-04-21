@@ -10,3 +10,4 @@ export * from './auth';
 export * from './user';
 export * from './tracking';
 export * from './pairing';
+export * from './profil';
