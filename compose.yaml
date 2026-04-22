@@ -1,12 +1,12 @@
 # Dev local — bind mounts, hot reload, ports exposés
-# Lancement : docker compose --profile nosql --profile node --profile socket --profile caddy-dev -p meet-me up -d
+# Lancement : docker compose -p meet-me up -d
 
 services:
 
   database:
-    image: mongo:7.0
+    image: mongo:6.0
     container_name: meet-me-mongo
-    profiles: ["nosql"]
+
     restart: always
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
@@ -19,12 +19,11 @@ services:
     volumes:
       - meet-me_data:/data/db
       - ./docker/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
-    networks:
-      - mika-network
+
 
   app:
     container_name: meet-me-app
-    profiles: ["node"]
+
     build:
       context: .
       dockerfile: ./docker/Node.Dockerfile
@@ -40,15 +39,15 @@ services:
     volumes:
       - .:/app
       - /app/node_modules
+      - /app/.next
     depends_on:
       - database
       - socket
-    networks:
-      - mika-network
+
 
   socket:
     container_name: meet-me-socket
-    profiles: ["socket"]
+
     build:
       context: .
       dockerfile: ./docker/Socket.Dockerfile
@@ -60,14 +59,15 @@ services:
     volumes:
       - .:/app
       - /app/node_modules
-    networks:
-      - mika-network
+
 
   server_dev:
     image: caddy:latest
     container_name: meet-me-caddy-dev
-    profiles: ["caddy-dev"]
+
     restart: always
+    environment:
+      - APP_URL=${APP_URL:-http://localhost:3000}
     ports:
       - "80:80"
     volumes:
@@ -77,16 +77,9 @@ services:
     depends_on:
       - app
       - socket
-    networks:
-      - mika-network
+
 
 volumes:
   meet-me_data:
   caddy_data:
   caddy_config:
-
-networks:
-  mika-network:
-    external: true
-
-# Créer le réseau une fois : docker network create mika-network
