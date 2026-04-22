@@ -1,0 +1,40 @@
+{
+  "collection": "forgot",
+  "description": "Collection pour les demandes de réinitialisation de mot de passe, ou la récupération de nom d'utilisateur",
+  "rules": {
+    "forgot": {
+      "email": {
+        "type": "string",
+        "description": "Adresse e-mail de l'utilisateur pour la réinitialisation du mot de passe ou la récupération du nom d'utilisateur",
+        "required": true,
+        "error": "L'adresse e-mail est requise et doit être valide"
+      },
+      "token": {
+        "type": "uuid",
+        "description": "Jeton unique pour la validation de la demande de réinitialisation ou de récupération",
+        "required": true
+      },
+      "type": {
+        "pattern": "^(password|username)$",
+        "description": "Type de demande : password pour réinitialisation de mot de passe, username pour récupération de nom d'utilisateur",
+        "error": "Le type doit être password ou username"
+      },
+      "createdAt": {
+        "type": "ISO-8601",
+        "description": "Date de création de la demande",
+        "required": true
+      },
+      "expiresAt": {
+        "type": "ISO-8601",
+        "description": "Date d'expiration de la demande pour des raisons de sécurité",
+        "required": true,
+        "error": "La date d'expiration doit être une date valide au format ISO-8601"
+      },
+      "used": {
+        "type": "boolean",
+        "description": "Indique si la demande a déjà été utilisée",
+        "default": false
+      }
+    }
+  }
+}
