@@ -8,6 +8,7 @@ import {usePathname} from "next/navigation";
 import {Burger} from "@/components/ui/burger";
 import {Logout} from "@/components/ui/logout";
 import {useAuth} from "@/components/auth/authContext";
+import {User} from 'lucide-react';
 
 export function Header() {
     const {isAuthenticated} = useAuth();
@@ -24,7 +25,7 @@ export function Header() {
 
     return (
         /* Fond très léger pour faire ressortir le blanc du logo ou bordure colorée */
-        <header className="bg-white shadow-sm border-b border-meetme-light">
+        <header className="sticky top-0 z-50 bg-white shadow-sm border-b border-meetme-light">
             <div className="container mx-auto px-4 py-4 flex items-center justify-between">
 
                 {/* On applique le bleu meetme au texte */}
@@ -64,6 +65,11 @@ export function Header() {
                     {/* Bouton Déconnexion: affiché si authentifié */}
                     {isAuthenticated && (
                         <Logout />
+                    )}
+                    {isAuthenticated && (
+                        <Link href="/profil" className={getLinkClasses(pathname === '/profil')}>
+                            <User size={22}/>
+                        </Link>
                     )}
                 </nav>
                 {/* Menu burger pour les écrans mobiles */}
