@@ -22,6 +22,9 @@ interface MailData {
     magicToken: string;
 }
 
+/**
+ * mail d'envoi de code de verification pour le suivi GPS
+ */
 export async function sendPairingCodeEmail({to, pairingCode, magicToken}: MailData) {
     const magicLink = `${process.env.APP_URL}/api/core/pairing?pairingCode=${pairingCode}&magicToken=${magicToken}`;
 
@@ -51,6 +54,71 @@ export async function sendPairingCodeEmail({to, pairingCode, magicToken}: MailDa
     } catch (error) {
         // En cas d'erreur, logguer l'erreur et retourner un message d'erreur générique
         console.error("Erreur SMTP : Vérifiez vos variables .env", error);
+        return {success: false, error};
+    }
+}
+
+/**
+ * mail de recuperation de nom d'utilisateur
+ */
+export async function sendRevealUsernameEmail({to, username, magicToken}: {to: string, username: string, magicToken: string}) {
+    const magicLink = `${process.env.APP_URL}/reveal-username?magicToken=${magicToken}`;
+
+    const mailOptions = {
+        from: `"Meet-Me" <${process.env.MAIL_USERNAME}>`,
+        to: to,
+        subject: `Récupération de votre nom d'utilisateur`,
+        html: `
+            <div style="font-family: sans-serif; padding: 20px; color: #333;">
+                <h2>Récupération de votre nom d'utilisateur</h2>
+                <p>Vous avez demandé à récupérer votre nom d'utilisateur.</p>
+                <p><strong>Votre nom d'utilisateur :</strong> ${username}</p>
+                <p>Cliquez sur le lien ci-dessous pour vous connecter automatiquement :</p>
+                <a href="${magicLink}" style="background: #0070f3; color: white; padding: 10px 20px; border-radius: 5px; text-decoration: none;">
+                    Valider la récupération
+                </a>
+                <p style="margin-top: 20px; font-size: 0.8em; color: #999;">
+                    Ce lien expire dans 15 minutes.
+                </p>
+            </div>
+        `,
+    };
+    try{
+        const info = await transporter.sendMail(mailOptions);
+        return {success: true, messageId: info.messageId};
+    }catch (error) {        console.error("Erreur SMTP : Vérifiez vos variables .env", error);
+        return {success: false, error};
+    }
+}
+
+/**
+ * mail de reinitialisation de mot de passe
+ */
+export async function sendResetPasswordEmail({to, magicToken}: {to: string, magicToken: string}) {
+    const magicLink = `${process.env.APP_URL}/reset-password?magicToken=${magicToken}`;
+
+    const mailOptions = {
+        from: `"Meet-Me" <${process.env.MAIL_USERNAME}>`,
+        to: to,
+        subject: `Réinitialisation de votre mot de passe`,
+        html: `
+            <div style="font-family: sans-serif; padding: 20px; color: #333;">
+                <h2>Réinitialisation de votre mot de passe</h2>
+                <p>Vous avez demandé à réinitialiser votre mot de passe.</p>
+                <p>Cliquez sur le lien ci-dessous pour vous connecter automatiquement et réinitialiser votre mot de passe :</p>
+                <a href="${magicLink}" style="background: #0070f3; color: white; padding: 10px 20px; border-radius: 5px; text-decoration: none;">
+                    Valider la réinitialisation
+                </a>
+                <p style="margin-top: 20px; font-size: 0.8em; color: #999;">
+                    Ce lien expire dans 15 minutes.
+                </p>
+            </div>
+        `,
+    };
+    try{
+        const info = await transporter.sendMail(mailOptions);
+        return {success: true, messageId: info.messageId};
+    }catch (error) {        console.error("Erreur SMTP : Vérifiez vos variables .env", error);
         return {success: false, error};
     }
 }
