@@ -112,3 +112,46 @@ export async function PUT(request: Request) {
         return NextResponse.json({ error: "Erreur interne du serveur" }, { status: 500 });
     }
 }
+
+/**
+ * route permmettant de supprimer le compte de l'utilisateur connecté
+ * elle vérifie que le token d'authentification est valide avant de supprimer le compte de l'utilisateur dans la base de données
+ * et de supprimer le cookie d'authentification
+ */
+
+export async function DELETE(request: Request) {
+    const token = await getAuthToken();
+    if (!token) {
+        return NextResponse.json({ error: "Token d'authentification manquant" }, { status: 401 });
+    }
+
+    let payload: Awaited<ReturnType<typeof verifyToken>>;
+    try {
+        payload = await verifyToken(token);
+    } catch {
+        return NextResponse.json({ error: "Token d'authentification invalide" }, { status: 401 });
+    }
+
+    const userId = payload.userId;
+    if (typeof userId !== "string" || !ObjectId.isValid(userId)) {
+        return NextResponse.json({ error: "ID utilisateur invalide dans le token" }, { status: 401 });
+    }
+
+    try {
+        const client = await clientPromise;
+        const db = client.db();
+        const result = await db.collection('users').deleteOne({ _id: new ObjectId(userId) });
+
+        if (result.deletedCount === 0) {
+            return NextResponse.json({ error: "Utilisateur non trouvé" }, { status: 404 });
+        }
+
+        // Suppression du cookie d'authentification
+        const response = NextResponse.json({ message: "Compte supprimé avec succès" }, { status: 200 });
+        response.cookies.set('authToken', '', { maxAge: -1, path: '/' });
+        return response;
+    } catch (error) {
+        console.error("Erreur lors de la suppression du compte utilisateur:", error);
+        return NextResponse.json({ error: "Erreur interne du serveur" }, { status: 500 });
+    }
+}
