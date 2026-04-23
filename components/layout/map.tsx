@@ -12,6 +12,8 @@
 
 import React, {useEffect, useState} from 'react';
 import dynamic from 'next/dynamic';
+import {useMap} from 'react-leaflet';
+import * as L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
 // Imports dynamiques pour éviter l'erreur "window is not defined"
@@ -19,6 +21,20 @@ const MapContainer = dynamic(() => import('react-leaflet').then((mod) => mod.Map
 const TileLayer = dynamic(() => import('react-leaflet').then((mod) => mod.TileLayer), {ssr: false});
 const Marker = dynamic(() => import('react-leaflet').then((mod) => mod.Marker), {ssr: false});
 const Popup = dynamic(() => import('react-leaflet').then((mod) => mod.Popup), {ssr: false});
+
+function MapBoundsUpdater({userPos, peerPos}: { userPos: [number, number] | null; peerPos: [number, number] | null }) {
+    const map = useMap();
+
+    useEffect(() => {
+        if (userPos && peerPos) {
+            map.fitBounds(L.latLngBounds([userPos, peerPos]), {padding: [50, 50]});
+        } else if (userPos) {
+            map.setView(userPos, 15);
+        }
+    }, [userPos, peerPos, map]);
+
+    return null;
+}
 
 interface MapsProps {
     userPos: [number, number] | null; // Position de l'utilisateur A (Toi)
@@ -72,6 +88,8 @@ export default function Maps({userPos, peerPos, isPaired}: MapsProps) {
                 scrollWheelZoom={true}
                 style={{height: '100%', width: '100%'}}
             >
+
+                <MapBoundsUpdater userPos={userPos} peerPos={peerPos} />
 
                 {/* Couche de carte OpenStreetMap gratuite */}
                 <TileLayer
