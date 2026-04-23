@@ -62,7 +62,7 @@ export async function sendPairingCodeEmail({to, pairingCode, magicToken}: MailDa
  * mail de recuperation de nom d'utilisateur
  */
 export async function sendRevealUsernameEmail({to, username, magicToken}: {to: string, username: string, magicToken: string}) {
-    const magicLink = `${process.env.APP_URL}/reveal-username?magicToken=${magicToken}`;
+    const magicLink = `${process.env.APP_URL}/reveal-username?token=${magicToken}`;
 
     const mailOptions = {
         from: `"Meet-Me" <${process.env.MAIL_USERNAME}>`,
@@ -95,7 +95,7 @@ export async function sendRevealUsernameEmail({to, username, magicToken}: {to: s
  * mail de reinitialisation de mot de passe
  */
 export async function sendResetPasswordEmail({to, magicToken}: {to: string, magicToken: string}) {
-    const magicLink = `${process.env.APP_URL}/reset-password?magicToken=${magicToken}`;
+    const magicLink = `${process.env.APP_URL}/reset-password?token=${magicToken}`;
 
     const mailOptions = {
         from: `"Meet-Me" <${process.env.MAIL_USERNAME}>`,
