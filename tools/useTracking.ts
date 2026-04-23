@@ -32,6 +32,9 @@ export const startSharingLocation = (
         return () => {};
     }
 
+    // Rejoindre la room avant d'écouter ou d'émettre
+    socket.emit('joinRoom', pairingCode);
+
     // Handler nommé pour pouvoir le retirer proprement
     const messageHandler = (packet: ISocketMessage) => {
         if (packet.type === 'LOCATION_UPDATE') {
