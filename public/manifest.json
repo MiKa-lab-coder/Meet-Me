@@ -1,0 +1,25 @@
+{
+  "name": "Meet-Me : Partage de position Live",
+  "short_name": "Meet-Me",
+  "description": "Meet-Me est une solution de mise en relation en temps réel. Partagez votre position géographique avec un partenaire de manière sécurisée via un code PIN unique. Idéal pour se retrouver facilement, suivre un trajet commun ou coordonner une rencontre, le tout protégé par un chiffrement de session et sans stockage de vos données de mouvement.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#3b82f6",
+  "orientation": "portrait",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

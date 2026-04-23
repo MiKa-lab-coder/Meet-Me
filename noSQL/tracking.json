@@ -1,0 +1,52 @@
+{
+  "collectionName": "trackings",
+  "descriptions": "Récupération des éléments nécessaires à la localisation d'un user",
+  "schema": {
+    "bsonType": "object",
+    "required": [
+      "userId",
+      "location",
+      "accuracy",
+      "timestamp"
+    ],
+    "properties": {
+      "_id": {
+        "bsonType": "objectId",
+        "description": "ID unique du ping"
+      },
+      "userId": {
+        "bsonType": "objectId",
+        "description": "Référence à l'_id de la collection users"
+      },
+      "location": {
+        "bsonType": "object",
+        "required": [
+          "lat",
+          "lng"
+        ],
+        "properties": {
+          "lat": {
+            "bsonType": "double",
+            "description": "La latitude"
+          },
+          "lng": {
+            "bsonType": "double",
+            "description": "La longitude"
+          }
+        }
+      },
+      "accuracy": {
+        "bsonType": "number",
+        "description": "Précision de la localisation"
+      },
+      "timestamp": {
+        "bsonType": "date",
+        "description": "Heure du relevé"
+      },
+      "heading": {
+        "bsonType": "number",
+        "description": "Direction (en degrés), optionnel si immobile"
+      }
+    }
+  }
+}

@@ -1,0 +1,80 @@
+{
+  "description": "Fichier de validation COMMUN front et back - Meet-Me Project",
+  "rules": {
+    "users": {
+      "username": {
+        "min": 3,
+        "max": 10,
+        "unique": true,
+        "required": true,
+        "pattern": "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)[A-Za-z\\d]{3,10}$",
+        "error": "Le nom d'utilisateur doit contenir 3-10 caractères, incluant 1 majuscule, 1 minuscule et 1 chiffre"
+      },
+      "email": {
+        "required": true,
+        "unique": true,
+        "pattern": "^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$",
+        "error": "Format d'email invalide (ex: exemple@domaine.com)"
+      },
+      "password": {
+        "min": 6,
+        "max": 12,
+        "required": true,
+        "pattern": "^(?=.*[A-Z])(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]).+$",
+        "description": "Force: 1 maj, 1 spécial. Longueur gérée par min/max.",
+        "error": "Le mot de passe nécessite 6-12 caractères avec 1 majuscule et 1 caractère spécial"
+      },
+      "confirmPassword": {
+        "required": true,
+        "error": "La confirmation du mot de passe doit correspondre au mot de passe"
+      }
+    },
+    "tracking": {
+      "location": {
+        "lat": {
+          "min": -90,
+          "max": 90,
+          "required": true,
+          "error": "La latitude doit être comprise entre -90 et 90"
+        },
+        "lng": {
+          "min": -180,
+          "max": 180,
+          "required": true,
+          "error": "La longitude doit être comprise entre -180 et 180"
+        }
+      },
+      "accuracy": {
+        "min": 0,
+        "max": 12,
+        "required": true,
+        "error": "Précision GPS insuffisante ou invalide (0-12m attendus)"
+      },
+      "timestamp": {
+        "required": true,
+        "type": "ISO-8601",
+        "error": "Date de position invalide ou manquante"
+      }
+    },
+    "pairing": {
+      "status": {
+        "pattern": "^(pending|active|expired)$",
+        "required": true,
+        "error": "Le statut doit être : en attente, actif ou expiré"
+      },
+      "expiresAt": {
+        "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d{3})?Z?$",
+        "required": true,
+        "description": "Format ISO-8601 pour la fin de session (RGPD)",
+        "error": "La date d'expiration est invalide"
+      },
+      "pairingCode": {
+        "min": 6,
+        "max": 6,
+        "pattern": "^[A-Z0-9]{6}$",
+        "description": "Code court pour le pairing, 6 caractères alphanumériques",
+        "error": "Le code doit comporter 6 caractères alphanumériques"
+      }
+    }
+  }
+}

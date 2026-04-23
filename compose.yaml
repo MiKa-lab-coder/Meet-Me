@@ -1,0 +1,85 @@
+# Dev local — bind mounts, hot reload, ports exposés
+# Lancement : docker compose -p meet-me up -d
+
+services:
+
+  database:
+    image: mongo:6.0
+    container_name: meet-me-mongo
+
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      MONGO_USERNAME: ${MONGO_USERNAME}
+      MONGO_PASSWORD: ${MONGO_PASSWORD}
+      MONGO_DB_NAME: ${MONGO_DB_NAME}
+    ports:
+      - "${PORT_MONGO_DEV:-27017}:27017"
+    volumes:
+      - meet-me_data:/data/db
+      - ./docker/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+
+
+  app:
+    container_name: meet-me-app
+
+    build:
+      context: .
+      dockerfile: ./docker/Node.Dockerfile
+    restart: always
+    working_dir: /app
+    environment:
+      APP_ENV: ${APP_ENV}
+      APP_URL: ${APP_URL}
+      MONGODB_URI: ${MONGO_URI}
+      JWT_SECRET: ${JWT_SECRET}
+    ports:
+      - "${PORT_NODE_DEV:-3000}:3000"
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/.next
+    depends_on:
+      - database
+      - socket
+
+
+  socket:
+    container_name: meet-me-socket
+
+    build:
+      context: .
+      dockerfile: ./docker/Socket.Dockerfile
+    restart: always
+    working_dir: /app
+    environment:
+      APP_URL: ${APP_URL}
+      SOCKET_PORT: 3001
+    volumes:
+      - .:/app
+      - /app/node_modules
+
+
+  server_dev:
+    image: caddy:latest
+    container_name: meet-me-caddy-dev
+
+    restart: always
+    environment:
+      - APP_URL=${APP_URL:-http://localhost:3000}
+    ports:
+      - "80:80"
+    volumes:
+      - ./docker/Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - app
+      - socket
+
+
+volumes:
+  meet-me_data:
+  caddy_data:
+  caddy_config:

@@ -1,0 +1,43 @@
+{
+  "collectionName": "pairings",
+  "description": "Contrat de liaison temporaire entre deux utilisateurs pour le tracking GPS",
+  "rules": {
+    "pairing": {
+      "pairingCode": {
+        "type": "string",
+        "description": "Code unique de 6 caractères généré pour l'appairage",
+        "error": "Le code doit comporter 6 caractères alphanumériques"
+      },
+      "magicToken": {
+        "type": "uuid",
+        "description": "Jeton unique pour la connexion automatique via lien magique",
+        "required": true
+      },
+      "initiatorId": {
+        "type": "objectId",
+        "description": "ID de l'utilisateur qui a lancé l'invitation (User A)",
+        "required": true
+      },
+      "targetId": {
+        "type": "objectId",
+        "description": "ID de l'utilisateur qui rejoint (User B). Null tant que status est pending",
+        "required": false
+      },
+      "status": {
+        "pattern": "^(pending|active|expired)$",
+        "description": "État de la liaison : pending (attente), active (en cours), expired (terminé ou expiré)",
+        "error": "Le statut doit être pending, active ou expired"
+      },
+      "createdAt": {
+        "type": "ISO-8601",
+        "description": "Date de création de la demande",
+        "required": true
+      },
+      "expiresAt": {
+        "type": "ISO-8601",
+        "description": "Fin de validité du partage (RGPD et sécurité)",
+        "required": true
+      }
+    }
+  }
+}
