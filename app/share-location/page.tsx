@@ -23,13 +23,17 @@ export default function SharingLocationPage() {
     const [pairingId, setPairingId] = useState<string | null>(null); // Pour le DELETE
     const [userId, setUserId] = useState<string | null>(null);
     const [socket, setSocket] = useState<Socket | null>(null);
+    const [meetReached, setMeetReached] = useState(false);
 
     // Récupérer l'identité de l'utilisateur au démarrage
     useEffect(() => {
         fetch('/api/auth/me').then(res => res.json()).then(data => setUserId(data.userId));
 
         // Connexion du client Socket.IO au serveur WebSocket standalone
-        const newSocket = io({
+        // En local : NEXT_PUBLIC_SOCKET_URL=http://localhost:3001 dans .env.local
+        // En prod : undefined → io() se connecte à l'origine courante (Caddy proxy /socket.io/*)
+        const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || undefined;
+        const newSocket = io(socketUrl as string, {
             transports: ['websocket', 'polling'],
             reconnection: true,
             reconnectionAttempts: 5,
@@ -98,7 +102,13 @@ export default function SharingLocationPage() {
                 userId,
                 socket,
                 (partnerData) => setPeerPos([partnerData.location.lat, partnerData.location.lng]),
-                () => alert("Arrivés !"),
+                () => {
+                    setIsPaired(false);
+                    setPairingCode(null);
+                    setPairingId(null);
+                    setPeerPos(null);
+                    setMeetReached(true);
+                },
                 (err) => console.error(err),
                 (position) => setUserPos(position) // Met à jour userPos en temps réel pendant le partage
             );
@@ -111,6 +121,25 @@ export default function SharingLocationPage() {
     return (
         <div className="flex flex-col gap-6 p-4">
             <h1 className="text-2xl font-bold">MeetMe - Tracking Live</h1>
+
+            {meetReached && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+                    <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-sm w-full mx-4 text-center flex flex-col gap-5">
+                        <div className="text-6xl">👀</div>
+                        <h2 className="text-2xl font-bold text-gray-800">Vous y êtes presque !</h2>
+                        <p className="text-gray-600 text-lg leading-relaxed">
+                            Vous êtes tout proche de votre contact.<br />
+                            <span className="font-semibold text-gray-800">Levez la tête et ouvrez bien les yeux !</span>
+                        </p>
+                        <button
+                            onClick={() => setMeetReached(false)}
+                            className="bg-gray-900 text-white rounded-xl py-3 px-6 font-semibold hover:bg-gray-700 transition-colors"
+                        >
+                            Compris !
+                        </button>
+                    </div>
+                </div>
+            )}
 
             <Maps userPos={userPos} peerPos={peerPos} isPaired={isPaired} />
 
