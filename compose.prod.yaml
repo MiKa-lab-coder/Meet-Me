@@ -77,12 +77,12 @@ services:
     volumes:
       - caddy_data:/data
       - caddy_config:/config
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.meet-me.rule=Host(`${APP_DOMAIN}`)"
-      - "traefik.http.routers.meet-me.tls=true"
-      - "traefik.http.routers.meet-me.tls.certresolver=letsencrypt"
-      - "traefik.http.services.meet-me.loadbalancer.server.port=80"
+#    labels:
+#      - "traefik.enable=true"
+#      - "traefik.http.routers.meet-me.rule=Host(`${APP_DOMAIN}`)"
+#      - "traefik.http.routers.meet-me.tls=true"
+#      - "traefik.http.routers.meet-me.tls.certresolver=letsencrypt"
+#      - "traefik.http.services.meet-me.loadbalancer.server.port=80"
     networks:
       - default
       - coolify
