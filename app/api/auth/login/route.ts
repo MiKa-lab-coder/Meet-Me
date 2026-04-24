@@ -36,7 +36,7 @@ export async function POST(request: Request) {
         }
 
         // Verification de l'existence de l'utilisateur dans la base de données
-        const client = await clientPromise;
+        const client = await clientPromise();
         const db = client.db();
 
         // s'assurer que les values sont de type string

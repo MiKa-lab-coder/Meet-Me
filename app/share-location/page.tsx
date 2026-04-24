@@ -9,7 +9,9 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import Maps from '@/components/layout/map';
+import dynamic from 'next/dynamic';
+
+const Maps = dynamic(() => import('@/components/layout/map'), { ssr: false });
 import PairingRemote from '@/components/auth/pairingRemote';
 import PinPairing from '@/components/ui/pinPairing';
 import { io, Socket } from "socket.io-client";
