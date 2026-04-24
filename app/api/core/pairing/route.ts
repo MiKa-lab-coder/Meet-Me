@@ -31,7 +31,7 @@ export async function POST(request: Request) {
         const userA = await verifyToken(token);
 
         // Récuperation du mail de l'utilisateur cible à partir du nom d'utilisateur
-        const client = await clientPromise;
+        const client = await clientPromise();
         const db = client.db();
         const userB = await db.collection('users').findOne({username: targetUsername});
 
@@ -101,7 +101,7 @@ export async function PATCH(request: Request) {
             return NextResponse.json({error: rules.rules.pairing.pairingCode.error}, {status: 400});
         }
 
-        const client = await clientPromise;
+        const client = await clientPromise();
         const db = client.db();
 
         // Recherche stricte : code + token + statut pending
@@ -168,7 +168,7 @@ export async function GET(request: Request) {
         return NextResponse.json({error: rules.rules.pairing.pairingCode.error}, {status: 400});
     }
 
-    const client = await clientPromise;
+    const client = await clientPromise();
     const db = client.db();
 
     // Recherche en base strict : code + token + statut pending
@@ -217,7 +217,7 @@ export async function DELETE(request: Request) {
         if (!token) return NextResponse.json({error: 'Non autorisé'}, {status: 401});
         const user = await verifyToken(token);
 
-        const client = await clientPromise;
+        const client = await clientPromise();
         const db = client.db();
 
         // Recherche de l'ID de pairing et vérification que l'utilisateur est soit l'initiateur soit la cible

@@ -27,7 +27,7 @@ export async function GET(request: Request) {
     }
 
     try {
-        const client = await clientPromise;
+        const client = await clientPromise();
         const db = client.db();
 
         const record = await db.collection('forgot').findOne({
@@ -81,7 +81,7 @@ export async function POST(request: Request) {
     }
 
     try {
-        const client = await clientPromise;
+        const client = await clientPromise();
         const db = client.db();
 
         const user = await db.collection('users').findOne({email: email});

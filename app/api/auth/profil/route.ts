@@ -32,7 +32,7 @@ export async function GET(request: Request) {
 
     // Récupération des informations du profil de l'utilisateur depuis la base de données
     try {
-        const client = await clientPromise;
+        const client = await clientPromise();
         const db = client.db();
         const user = await db.collection('users').findOne({ _id: new ObjectId(userId) });
 
@@ -91,7 +91,7 @@ export async function PUT(request: Request) {
     }
 
     try {
-        const client = await clientPromise;
+        const client = await clientPromise();
         const db = client.db();
         const updateData: Partial<{ username: string; email: string }> = {};
         if (data.username) updateData.username = data.username;
@@ -138,7 +138,7 @@ export async function DELETE(request: Request) {
     }
 
     try {
-        const client = await clientPromise;
+        const client = await clientPromise();
         const db = client.db();
         const result = await db.collection('users').deleteOne({ _id: new ObjectId(userId) });
 

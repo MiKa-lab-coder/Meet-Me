@@ -68,7 +68,7 @@ export async function POST(request: Request) {
         };
 
         // verification que l'utilisateur et l'email n'existent pas déjà dans la base de données
-        const client = await clientPromise;
+        const client = await clientPromise();
         const db = client.db();
         if (typeof data.username !== 'string' || typeof data.email !== 'string') {
             return NextResponse.json({error: "Données d'inscription invalides"}, {status: 400});
