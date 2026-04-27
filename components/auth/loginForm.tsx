@@ -48,7 +48,7 @@ export function LoginForm({onSubmit, error,isLoading}: LoginFormProps) {
             />
             <div className="flex items-center justify-end">
                 <div className="text-sm">
-                    <Link href="/forgotID" className="font-medium text-red-800 hover:text-meetme-blue-dark">
+                    <Link href="/forgotID" className="font-medium text-meetme-blue hover:text-meetme-blue-dark">
                         Mot de passe oublié ?
                     </Link>
                 </div>
