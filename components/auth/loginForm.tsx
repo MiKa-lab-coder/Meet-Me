@@ -46,15 +46,7 @@ export function LoginForm({onSubmit, error,isLoading}: LoginFormProps) {
                 autoComplete="current-password"
                 required
             />
-            <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                    <input
-                        id="remember-me"
-                        name="remember-me"
-                        type="checkbox"
-                        className="h-4 w-4 text-meetme-blue focus:ring-meetme-blue border-gray-300 rounded"
-                    />
-                </div>
+            <div className="flex items-center justify-end">
                 <div className="text-sm">
                     <Link href="/forgotID" className="font-medium text-meetme-blue hover:text-meetme-blue-dark">
                         Mot de passe oublié ?
