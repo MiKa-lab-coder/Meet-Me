@@ -54,9 +54,6 @@ export function LoginForm({onSubmit, error,isLoading}: LoginFormProps) {
                         type="checkbox"
                         className="h-4 w-4 text-meetme-blue focus:ring-meetme-blue border-gray-300 rounded"
                     />
-                    <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
-                        Se souvenir de moi
-                    </label>
                 </div>
                 <div className="text-sm">
                     <Link href="/forgotID" className="font-medium text-meetme-blue hover:text-meetme-blue-dark">
