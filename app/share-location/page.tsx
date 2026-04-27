@@ -121,8 +121,8 @@ export default function SharingLocationPage() {
     }, [isPaired, pairingCode, socket, userId]);
 
     return (
-        <div className="flex flex-col gap-6 p-4">
-            <h1 className="text-2xl font-bold">MeetMe - Tracking Live</h1>
+        <div className="flex flex-col gap-6 p-4 mt-10">
+            <h1 className="text-2xl font-bold pb-7">MeetMe - Tracking Live</h1>
 
             {meetReached && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
