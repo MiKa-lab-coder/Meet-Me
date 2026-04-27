@@ -21,18 +21,19 @@ export function Burger() {
 
     // Rendu du composant
     return (
-        <div className="relative">
+        <div className="relative z-50">
             <button onClick={toggleMenu} className="p-2 text-meetme-blue">
                 {isMenuOpen ? <X size={24}/> : <Menu size={24}/>}
             </button>
 
             {isMenuOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 p-2">
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-50 p-2">
                     <Link href="/" onClick={() => setIsMenuOpen(false)} className="block px-4 py-2 text-meetme-blue hover:bg-gray-100">Accueil</Link>
 
                     {isAuthenticated ? (
                         <>
                             <Link href="/share-location" onClick={() => setIsMenuOpen(false)} className="block px-4 py-2 text-meetme-blue hover:bg-gray-100">Meet-Me</Link>
+                            <Link href="/profil" onClick={() => setIsMenuOpen(false)} className="block px-4 py-2 text-meetme-blue hover:bg-gray-100">Profil</Link>
                             <div className="border-t border-gray-100 mt-2 pt-2">
                                 <Logout/>
                             </div>
