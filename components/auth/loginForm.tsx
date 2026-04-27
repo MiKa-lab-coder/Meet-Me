@@ -7,6 +7,7 @@
 
 import {ValidateButton} from "@/components/ui/button";
 import React from "react"; // Import du bouton de validation réutilisable
+import Link from "next/link";
 
 interface LoginFormProps {
     onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
@@ -45,6 +46,24 @@ export function LoginForm({onSubmit, error,isLoading}: LoginFormProps) {
                 autoComplete="current-password"
                 required
             />
+            <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                    <input
+                        id="remember-me"
+                        name="remember-me"
+                        type="checkbox"
+                        className="h-4 w-4 text-meetme-blue focus:ring-meetme-blue border-gray-300 rounded"
+                    />
+                    <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
+                        Se souvenir de moi
+                    </label>
+                </div>
+                <div className="text-sm">
+                    <Link href="/forgotID" className="font-medium text-meetme-blue hover:text-meetme-blue-dark">
+                        Mot de passe oublié ?
+                    </Link>
+                </div>
+            </div>
 
             {/* Appelle du bouton */}
             <div className="mt-2">
