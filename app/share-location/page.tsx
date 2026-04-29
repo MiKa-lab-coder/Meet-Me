@@ -29,7 +29,14 @@ export default function SharingLocationPage() {
 
     // Récupérer l'identité de l'utilisateur au démarrage
     useEffect(() => {
-        fetch('/api/auth/me').then(res => res.json()).then(data => setUserId(data.userId));
+        console.log('[auth] fetch /api/auth/me...');
+        fetch('/api/auth/me')
+            .then(res => res.json())
+            .then(data => {
+                console.log('[auth] me response:', data);
+                setUserId(data.user?.userId);
+            })
+            .catch(err => console.error('[auth] me error:', err));
 
         // Connexion du client Socket.IO au serveur WebSocket standalone
         // En local : NEXT_PUBLIC_SOCKET_URL=http://localhost:3001 dans .env.local
@@ -123,6 +130,9 @@ export default function SharingLocationPage() {
     return (
         <div className="flex flex-col gap-6 p-4 mt-10">
             <h1 className="text-2xl font-bold pb-7">MeetMe - Tracking Live</h1>
+            <div className="fixed bottom-2 right-2 bg-black text-white text-xs p-2 rounded z-[9999] font-mono">
+                isPaired: {String(isPaired)} | code: {pairingCode ?? 'null'} | userId: {userId ? userId.slice(0,6) : 'null'} | socket: {socket?.connected ? '✓' : '✗'}
+            </div>
 
             {meetReached && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">

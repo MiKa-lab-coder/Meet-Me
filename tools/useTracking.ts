@@ -32,11 +32,24 @@ export const startSharingLocation = (
         return () => {};
     }
 
-    // Rejoindre la room avant d'écouter ou d'émettre
     socket.emit('joinRoom', pairingCode);
+    console.log('[socket] joinRoom émis pour', pairingCode);
 
-    // Handler nommé pour pouvoir le retirer proprement
+    const peerJoinedHandler = () => {
+        console.log('[socket] peerJoined reçu, myLastPosition =', myLastPosition);
+        if (myLastPosition) {
+            socket.emit('message', {
+                pairingCode,
+                senderId,
+                type: 'LOCATION_UPDATE',
+                data: myLastPosition,
+            });
+        }
+    };
+    socket.on('peerJoined', peerJoinedHandler);
+
     const messageHandler = (packet: ISocketMessage) => {
+        console.log('[socket] message reçu :', packet.type, packet.data);
         if (packet.type === 'LOCATION_UPDATE') {
             const partnerPosition = packet.data as ITracking;
             onPartnerMove(partnerPosition);
@@ -49,7 +62,7 @@ export const startSharingLocation = (
                 );
 
                 // Seuil de 12m : compromis optimal entre précision GPS et fiabilité de rencontre
-                if (distance <= 12) {
+                if (distance <= 1) { // TODO: remettre à 12 avant prod
                     onMeetSuccess();
                     cleanup();
                 }
@@ -80,13 +93,13 @@ export const startSharingLocation = (
                 onSelfMove([position.coords.latitude, position.coords.longitude]);
             }
 
-            // Envoie la position au serveur via WebSocket
             const message: ISocketMessage = {
                 pairingCode,
                 senderId,
                 type: 'LOCATION_UPDATE',
                 data: myLastPosition,
             };
+            console.log('[socket] envoi position :', myLastPosition.location);
             socket.emit('message', message);
         },
         (error) => {
@@ -109,6 +122,7 @@ export const startSharingLocation = (
             watchId = null;
         }
         socket.off('message', messageHandler);
+        socket.off('peerJoined', peerJoinedHandler);
         socket.emit('message', {
             pairingCode,
             senderId,

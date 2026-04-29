@@ -46,9 +46,14 @@ export const socketTunnel = (io: Server) => {
                 return;
             }
 
-            // Ajoute le client à la "Room" (la crée si elle n'existe pas)
             socket.join(pairingCode);
             console.log(`Client ${socket.id} rejoint la salle ${pairingCode}`);
+
+            // Quand le 2ème client rejoint, on demande à tout le monde de renvoyer leur position
+            const updatedRoom = io.sockets.adapter.rooms.get(pairingCode);
+            if (updatedRoom && updatedRoom.size === 2) {
+                io.to(pairingCode).emit('peerJoined');
+            }
         });
 
         /**
