@@ -4,7 +4,6 @@
 #
 # Variables requises dans Coolify :
 #   APP_URL             → https://meet-me.mondomaine.com
-#   APP_DOMAIN          → meet-me.mondomaine.com  (hostname seul, pour Traefik)
 #   MONGO_URI           → mongodb://appuser:PASSWORD@mongodb:27017/meet_me_db?authSource=admin
 #   JWT_SECRET
 #   MONGO_INITDB_ROOT_USERNAME
@@ -77,12 +76,13 @@ services:
     volumes:
       - caddy_data:/data
       - caddy_config:/config
-#    labels:
-#      - "traefik.enable=true"
-#      - "traefik.http.routers.meet-me.rule=Host(`${APP_DOMAIN}`)"
-#      - "traefik.http.routers.meet-me.tls=true"
-#      - "traefik.http.routers.meet-me.tls.certresolver=letsencrypt"
-#      - "traefik.http.services.meet-me.loadbalancer.server.port=80"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.meet-me.rule=Host(`meet-me.mika-lab.ovh`)"
+      - "traefik.http.routers.meet-me.tls=true"
+      - "traefik.http.routers.meet-me.tls.certresolver=letsencrypt"
+      - "traefik.docker.network=coolify"
+      - "traefik.http.services.meet-me.loadbalancer.server.port=80"
     networks:
       - default
       - coolify

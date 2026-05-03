@@ -56,6 +56,8 @@ services:
     environment:
       APP_URL: ${APP_URL}
       SOCKET_PORT: 3001
+    ports:
+      - "3001:3001"
     volumes:
       - .:/app
       - /app/node_modules

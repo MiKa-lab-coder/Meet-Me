@@ -8,7 +8,7 @@ import {usePathname} from "next/navigation";
 import {Burger} from "@/components/ui/burger";
 import {Logout} from "@/components/ui/logout";
 import {useAuth} from "@/components/auth/authContext";
-import {User} from 'lucide-react';
+
 
 export function Header() {
     const {isAuthenticated} = useAuth();
@@ -61,16 +61,18 @@ export function Header() {
                             Inscription
                         </Link>
                     )}
+                    {/* Lien espace perso*/}
+                    {isAuthenticated && (
+                        <Link href="/profil" className={getLinkClasses(pathname === '/profil')}>
+                            Mon Espace
+                        </Link>
+                    )}
 
                     {/* Bouton Déconnexion: affiché si authentifié */}
                     {isAuthenticated && (
                         <Logout />
                     )}
-                    {isAuthenticated && (
-                        <Link href="/profil" className={getLinkClasses(pathname === '/profil')}>
-                            <User size={22}/>
-                        </Link>
-                    )}
+
                 </nav>
                 {/* Menu burger pour les écrans mobiles */}
                 <div className="md:hidden">

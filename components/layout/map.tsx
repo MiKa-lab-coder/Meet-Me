@@ -80,7 +80,7 @@ export default function Maps({userPos, peerPos, isPaired}: MapsProps) {
     const mapCenter = userPos ?? peerPos ?? fallbackCenter;
 
     return (
-        <div className="h-[500px] w-full rounded-xl shadow-lg overflow-hidden border-2 border-white">
+        <div className="relative z-0 h-[500px] w-full rounded-xl shadow-lg overflow-hidden border-2 border-white">
             <MapContainer
                 key={mapKey}
                 center={mapCenter}

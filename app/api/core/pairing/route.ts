@@ -7,8 +7,8 @@
 import {NextResponse} from 'next/server';
 import rules from '@/shared/rules.json';
 import clientPromise from '@/lib/mongodb';
-import {getAuthToken} from "@/lib/httpOnly";
-import {verifyToken} from "@/lib/auth";
+import {getAuthToken, setAuthCookie} from "@/lib/httpOnly";
+import {verifyToken, createToken} from "@/lib/auth";
 import {sendPairingCodeEmail} from "@/tools/mail";
 import {ObjectId} from "mongodb";
 
@@ -51,8 +51,8 @@ export async function POST(request: Request) {
 
         // Insertion du nouveau pairing dans la collection 'pairings' avec les champs requis
         const newPairing = await db.collection('pairings').insertOne({
-            initiatorId: userA.userId, // Utilisation de l'ID réel du payload
-            targetId: null, // Cible non définie à ce stade
+            initiatorId: userA.userId,
+            targetId: userB._id.toString(), // Connu dès la création, nécessaire pour l'auto-login
             status: 'pending', // Statut initial conforme au contrat
             pairingCode,
             magicToken,
@@ -187,8 +187,19 @@ export async function GET(request: Request) {
         return NextResponse.json({error: 'Ce lien a expiré'}, {status: 400});
     }
 
-    // Redirection vers la page de partage de localisation avec les paramètres nécessaires pour la validation du pairing
-    // On passe le code et le token dans l'URL pour que la page puisse appeler le PATCH
+    // Auto-login User B : on récupère son profil et on lui pose un cookie JWT
+    const userB = await db.collection('users').findOne({_id: new ObjectId(pairing.targetId)});
+    if (!userB) {
+        return NextResponse.json({error: 'Utilisateur cible introuvable'}, {status: 404});
+    }
+
+    const token = await createToken({
+        userId: userB._id.toString(),
+        username: userB.username,
+        email: userB.email,
+    });
+    await setAuthCookie(token);
+
     const redirectUrl = new URL('/share-location', request.url);
     redirectUrl.searchParams.set('pairingCode', pairingCode);
     redirectUrl.searchParams.set('magicToken', magicToken);
