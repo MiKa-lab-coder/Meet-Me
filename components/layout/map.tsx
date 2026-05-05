@@ -111,7 +111,7 @@ export default function Maps({userPos, peerPos, isPaired}: MapsProps) {
                 {isPaired && peerPos && (
                     <Marker position={peerPos}>
                         <Popup>
-                            <span className="font-bold text-blue-600">Utilisateur B</span> <br/>
+                            <span className="font-bold text-red-800">Utilisateur B</span> <br/>
                             Position partagée en temps réel.
                         </Popup>
                     </Marker>
