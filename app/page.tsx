@@ -1,13 +1,23 @@
 "use client";
 
 import {useAuth} from "@/components/auth/authContext";
-import {Users, Mail, Navigation2, ShieldCheck} from "lucide-react";
+import {Navigation2, ShieldCheck} from "lucide-react";
 
 export default function Home() {
   const {isAuthenticated} = useAuth();
 
   return (
-      <div className="flex flex-col gap-10 py-6 max-w-md mx-auto">
+      <div className="relative overflow-hidden flex flex-col gap-10 py-6 max-w-md mx-auto">
+        {/* Bannière maintenance fixe en travers de la page et au-dessus du contenu */}
+        <div
+            className="pointer-events-none fixed left-1/2 top-1/2 z-70 w-[140vw] -translate-x-1/2 -translate-y-1/2 -rotate-22 border-y-2 border-red-600 bg-white/95 py-2 text-center"
+            aria-hidden="true"
+        >
+          <p className="text-sm font-extrabold uppercase tracking-wide text-red-700">
+            App en maintenance - fonctionnalités limitées
+          </p>
+        </div>
+
         {/* Introduction */}
         <section className="text-center space-y-3">
           <h1 className="text-4xl font-extrabold text-meetme-blue tracking-tight">
